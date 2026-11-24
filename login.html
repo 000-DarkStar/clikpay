@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connexion — clik.pay</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="stylesheet" href="assets/css/auth.css">
+</head>
+<body>
+<div class="split">
+
+  <aside class="hero">
+    <a class="brand-logo" href="index.html"><img src="assets/img/logo-black.svg" alt="clik.pay"></a>
+    <div class="hero-bottom">
+      <div class="kicker"><i class="fa-regular fa-shield-halved"></i> Fait pour les créateurs</div>
+      <h1>Tes liens t'attendent.</h1>
+      <p>Crée des liens, partage-les et suis tes gains en un seul endroit.</p>
+      <div class="steps">
+        <div class="step on"><span class="n"><i class="fa-solid fa-check"></i></span>Connexion sécurisée</div>
+        <div class="step"><span class="n">2</span>Retrouve tes liens</div>
+        <div class="step"><span class="n">3</span>Suis tes gains</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="panel">
+    <div class="form-col">
+      <h2>Content de te revoir</h2>
+
+      <div class="oauth">
+        <button type="button" id="googleBtn"><i class="fa-brands fa-google"></i> Google</button>
+        <button type="button" disabled title="Bientôt disponible"><i class="fa-brands fa-github"></i> GitHub</button>
+        <button type="button" disabled title="Bientôt disponible"><i class="fa-brands fa-discord"></i> Discord</button>
+      </div>
+
+      <div class="or">OU</div>
+
+      <form id="f" autocomplete="on">
+        <div class="field">
+          <label for="u">Pseudo</label>
+          <div class="input"><input id="u" type="text" placeholder="Entre ton pseudo" autocomplete="username"></div>
+        </div>
+        <div class="field">
+          <label for="p">Mot de passe <a class="forgot" href="#">Mot de passe oublié ?</a></label>
+          <div class="input has-eye">
+            <input id="p" type="password" placeholder="Entre ton mot de passe" autocomplete="current-password">
+            <button type="button" class="eye" aria-label="Afficher le mot de passe"><i class="fa-regular fa-eye"></i></button>
+          </div>
+        </div>
+        <button class="submit" id="go" disabled>Se connecter <i class="fa-solid fa-arrow-right"></i></button>
+      </form>
+
+      <div class="switch">Pas encore de compte ? <a href="register.html">Créer un compte</a></div>
+      <div class="switch sm">Tu n'as pas reçu l'e-mail d'activation ? <a class="w" href="#">Renvoyer l'e-mail</a></div>
+    </div>
+  </main>
+
+</div>
+<script>
+const u=document.getElementById('u'),p=document.getElementById('p'),go=document.getElementById('go');
+const check=()=>{go.disabled=!(u.value.trim()&&p.value)};
+u.addEventListener('input',check);p.addEventListener('input',check);
+document.querySelector('.eye').addEventListener('click',e=>{
+  const b=e.currentTarget,show=p.type==='password';
+  p.type=show?'text':'password';
+  b.innerHTML='<i class="fa-regular fa-eye'+(show?'-slash':'')+'"></i>';
+});
+document.getElementById('f').addEventListener('submit',e=>e.preventDefault());
+
+// Connexion Google OAuth
+document.getElementById('googleBtn').addEventListener('click', () => {
+  window.location.href = 'http://localhost:3001/auth/google';
+});
+</script>
+</body>
+</html>

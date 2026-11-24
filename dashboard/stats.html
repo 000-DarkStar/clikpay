@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Statistiques — clik.pay</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="dashboard.css">
+<script>try{document.documentElement.setAttribute('data-theme', localStorage.getItem('cp-theme')||'dark');}catch(e){}</script>
+</head>
+<body>
+<div class="bg-layer"></div>
+<div class="shell">
+  <aside id="sidebar">
+    <div class="side-brand"><i class="fa-solid fa-lock"></i><img class="side-logo side-logo-dark" src="../assets/img/logo-white.svg" alt="clik.pay"><img class="side-logo side-logo-light" src="../assets/img/logo-black.svg" alt="clik.pay"></div>
+    <nav class="side-nav">
+      <a class="side-link" href="dashboard.html"><i class="fa-solid fa-gauge"></i> Tableau de bord</a>
+      <a class="side-link" href="links.html"><i class="fa-solid fa-link"></i> Mes liens</a>
+      <a class="side-link active" href="stats.html"><i class="fa-solid fa-chart-line"></i> Statistiques</a>
+      <a class="side-link" href="payments.html"><i class="fa-solid fa-wallet"></i> Paiements</a>
+      <a class="side-link" href="settings.html"><i class="fa-solid fa-gear"></i> Réglages</a>
+    </nav>
+    <div class="side-foot">
+      <div class="theme-switch" style="width:fit-content">
+        <div class="theme-opt" data-t="dark"><i class="fa-solid fa-moon"></i></div>
+        <div class="theme-opt" data-t="gray"><i class="fa-solid fa-circle-half-stroke"></i></div>
+        <div class="theme-opt" data-t="light"><i class="fa-solid fa-sun"></i></div>
+      </div>
+      <a class="side-link" href="#" id="logoutLink" style="padding-left:12px"><i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion</a>
+    </div>
+  </aside>
+
+  <main id="main">
+    <div class="topbar">
+      <div>
+        <button id="dashBurger" class="icon-sm"><i class="fa-solid fa-bars"></i></button>
+        <div class="page-title">Statistiques</div>
+        <div class="page-sub">Performance de tes liens sur la période choisie.</div>
+      </div>
+      <div class="topbar-right"><div class="user-pill"><div class="avatar">JA</div> Jager</div></div>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab-btn">Aujourd'hui</div>
+      <div class="tab-btn active">7 jours</div>
+      <div class="tab-btn">30 jours</div>
+      <div class="tab-btn">Tout</div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="kpi"><div class="lbl"><i class="fa-solid fa-mouse-pointer"></i> Clics</div><div class="val">0</div><div class="delta">— 0,00 %</div></div>
+      <div class="kpi"><div class="lbl"><i class="fa-solid fa-unlock"></i> Déblocages</div><div class="val">0</div><div class="delta">— 0,00 %</div></div>
+      <div class="kpi"><div class="lbl"><i class="fa-solid fa-percent"></i> Taux de conversion</div><div class="val">0,00 %</div><div class="delta">—</div></div>
+      <div class="kpi"><div class="lbl"><i class="fa-solid fa-euro-sign"></i> Revenu</div><div class="val">0,00 €</div><div class="delta">— 0,00 %</div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h3>Déblocages par jour</h3></div>
+      <div class="empty-state">
+        <i class="fa-solid fa-chart-line"></i>
+        <p>Aucune donnée pour cette période.</p>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-head"><h3>Répartition par pays</h3></div>
+        <div class="empty-state">
+          <i class="fa-solid fa-earth-europe"></i>
+          <p>Aucun clic enregistré pour le moment.</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Meilleurs liens</h3></div>
+        <div class="empty-state">
+          <i class="fa-solid fa-ranking-star"></i>
+          <p>Aucun lien à classer pour le moment.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/dashboard-common.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="dashboard.js"></script>
+</body>
+</html>

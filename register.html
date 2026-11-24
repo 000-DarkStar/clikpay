@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inscription — clik.pay</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="stylesheet" href="assets/css/auth.css">
+</head>
+<body>
+<div class="split">
+
+  <aside class="hero">
+    <a class="brand-logo" href="index.html"><img src="assets/img/logo-black.svg" alt="clik.pay"></a>
+    <div class="hero-bottom">
+      <div class="kicker"><i class="fa-regular fa-shield-halved"></i> Fait pour les créateurs</div>
+      <h1>Transforme tes clics en revenus.</h1>
+      <p>Crée des liens, partage-les et suis tes gains en un seul endroit.</p>
+      <div class="steps">
+        <div class="step on"><span class="n"><i class="fa-solid fa-check"></i></span>Crée ton compte</div>
+        <div class="step"><span class="n">2</span>Parle-nous de ton activité</div>
+        <div class="step"><span class="n">3</span>Commence à gagner</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="panel">
+    <div class="form-col">
+      <h2>Crée ton compte</h2>
+
+      <label class="check"><input type="checkbox" id="tos"> <span>J'accepte les <a href="#">Conditions d'utilisation</a> et la <a href="#">Politique de confidentialité</a>.</span></label>
+
+      <div class="oauth">
+        <button type="button" id="googleBtn"><i class="fa-brands fa-google"></i> Google</button>
+        <button type="button" disabled title="Bientôt disponible"><i class="fa-brands fa-github"></i> GitHub</button>
+        <button type="button" disabled title="Bientôt disponible"><i class="fa-brands fa-discord"></i> Discord</button>
+      </div>
+
+      <div class="field" style="margin-top:30px">
+        <label for="src">Comment as-tu connu clik.pay ? <small class="inl">Facultatif</small></label>
+        <div class="input">
+          <select id="src">
+            <option value="">Choisis une source</option>
+            <option>Discord</option>
+            <option>Telegram</option>
+            <option>X (Twitter)</option>
+            <option>YouTube</option>
+            <option>TikTok</option>
+            <option>Bouche à oreille</option>
+            <option>Autre</option>
+          </select>
+          <i class="fa-solid fa-chevron-down chev"></i>
+        </div>
+      </div>
+
+      <div class="or">OU</div>
+
+      <form id="f" autocomplete="on">
+        <div class="sect">Détails du compte</div>
+        <div class="grid2">
+          <div class="field">
+            <label for="u">Pseudo</label>
+            <div class="input"><input id="u" type="text" placeholder="ex. toncrew" autocomplete="username"></div>
+          </div>
+          <div class="field">
+            <label for="e">E-mail</label>
+            <div class="input"><input id="e" type="email" placeholder="toi@exemple.com" autocomplete="email"></div>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="p">Mot de passe</label>
+            <div class="input has-eye">
+              <input id="p" type="password" placeholder="Crée un mot de passe" autocomplete="new-password">
+              <button type="button" class="eye" aria-label="Afficher le mot de passe"><i class="fa-regular fa-eye"></i></button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="p2">Confirmer le mot de passe</label>
+            <div class="input has-eye">
+              <input id="p2" type="password" placeholder="Répète ton mot de passe" autocomplete="new-password">
+              <button type="button" class="eye" aria-label="Afficher le mot de passe"><i class="fa-regular fa-eye"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="strength">
+          <div class="strength-top"><span>Force du mot de passe</span><span id="lvl">Commence à écrire</span></div>
+          <div class="bar"><i id="bar"></i></div>
+          <ul class="rules" id="rules">
+            <li data-r="len"><i class="fa-solid fa-xmark"></i> 8+ caractères</li>
+            <li data-r="up"><i class="fa-solid fa-xmark"></i> Majuscule</li>
+            <li data-r="lo"><i class="fa-solid fa-xmark"></i> Minuscule</li>
+            <li data-r="num"><i class="fa-solid fa-xmark"></i> Chiffre</li>
+            <li data-r="sp"><i class="fa-solid fa-xmark"></i> Caractère spécial</li>
+          </ul>
+        </div>
+
+        <div class="invoice">
+          <label class="check"><input type="checkbox"> <i class="fa-regular fa-building"></i> <span>Ajouter les infos de facturation entreprise</span></label>
+          <small>Tu pourras aussi les ajouter plus tard dans Facturation.</small>
+        </div>
+
+        <button class="submit" id="go" disabled>Créer mon compte <i class="fa-solid fa-arrow-right"></i></button>
+      </form>
+
+      <div class="switch">Déjà inscrit ? <a href="login.html">Se connecter</a></div>
+      <div class="switch sm">Besoin d'un nouvel e-mail de vérification ? <a href="#">Renvoyer</a></div>
+    </div>
+  </main>
+
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const u=$('u'),e=$('e'),p=$('p'),p2=$('p2'),tos=$('tos'),go=$('go');
+const tests={len:v=>v.length>=8,up:v=>/[A-Z]/.test(v),lo:v=>/[a-z]/.test(v),num:v=>/\d/.test(v),sp:v=>/[^A-Za-z0-9]/.test(v)};
+const labels=['Très faible','Faible','Moyen','Bon','Excellent'];
+function update(){
+  let score=0;
+  document.querySelectorAll('#rules li').forEach(li=>{
+    const ok=tests[li.dataset.r](p.value);
+    li.classList.toggle('ok',ok);
+    li.querySelector('i').className='fa-solid '+(ok?'fa-check':'fa-xmark');
+    if(ok)score++;
+  });
+  $('bar').style.width=(score*20)+'%';
+  $('bar').style.background=score<3?'#ff6b6b':score<5?'#ffc24b':'#3ddc84';
+  $('lvl').textContent=p.value?labels[Math.max(score-1,0)]:'Commence à écrire';
+  const valid=u.value.trim()&&/^\S+@\S+\.\S+$/.test(e.value)&&score===5&&p.value===p2.value&&tos.checked;
+  go.disabled=!valid;
+}
+[u,e,p,p2,tos].forEach(el=>el.addEventListener('input',update));
+document.querySelectorAll('.eye').forEach(b=>b.addEventListener('click',()=>{
+  const inp=b.parentElement.querySelector('input'),show=inp.type==='password';
+  inp.type=show?'text':'password';
+  b.innerHTML='<i class="fa-regular fa-eye'+(show?'-slash':'')+'"></i>';
+}));
+$('f').addEventListener('submit',ev=>ev.preventDefault());
+
+// Connexion Google OAuth
+document.getElementById('googleBtn').addEventListener('click', () => {
+  window.location.href = 'http://localhost:3001/auth/google';
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tableau de bord — clik.pay</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="dashboard.css">
+<script>try{document.documentElement.setAttribute('data-theme', localStorage.getItem('cp-theme')||'dark');}catch(e){}</script>
+</head>
+<body>
+<div class="bg-layer"></div>
+<div class="shell">
+
+  <aside id="sidebar">
+    <div class="side-brand"><i class="fa-solid fa-lock"></i><img class="side-logo side-logo-dark" src="../assets/img/logo-white.svg" alt="clik.pay"><img class="side-logo side-logo-light" src="../assets/img/logo-black.svg" alt="clik.pay"></div>
+    <nav class="side-nav">
+      <a class="side-link active" href="dashboard.html"><i class="fa-solid fa-gauge"></i> Tableau de bord</a>
+      <a class="side-link" href="links.html"><i class="fa-solid fa-link"></i> Mes liens</a>
+      <a class="side-link" href="stats.html"><i class="fa-solid fa-chart-line"></i> Statistiques</a>
+      <a class="side-link" href="payments.html"><i class="fa-solid fa-wallet"></i> Paiements</a>
+      <a class="side-link" href="settings.html"><i class="fa-solid fa-gear"></i> Réglages</a>
+    </nav>
+    <div class="side-foot">
+      <div class="theme-switch" style="width:fit-content">
+        <div class="theme-opt" data-t="dark"><i class="fa-solid fa-moon"></i></div>
+        <div class="theme-opt" data-t="gray"><i class="fa-solid fa-circle-half-stroke"></i></div>
+        <div class="theme-opt" data-t="light"><i class="fa-solid fa-sun"></i></div>
+      </div>
+      <a class="side-link" href="#" id="logoutLink" style="padding-left:12px"><i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion</a>
+    </div>
+  </aside>
+
+  <main id="main">
+    <div class="topbar">
+      <div>
+        <button id="dashBurger" class="icon-sm" style="display:none;margin-bottom:10px"><i class="fa-solid fa-bars"></i></button>
+        <div class="page-title">Tableau de bord</div>
+        <div class="page-sub">Vue d'ensemble de tes liens et de tes revenus.</div>
+      </div>
+      <div class="topbar-right">
+        <a class="btn btn-solid btn-sm" href="links.html"><i class="fa-solid fa-plus"></i> Nouveau lien</a>
+        <div class="user-pill"><div class="avatar">JA</div> Jager</div>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="kpi"><div class="lbl"><i class="fa-solid fa-wallet"></i> Solde disponible</div><div class="val">0,00 €</div><div class="delta">— 0,00 % de variation</div></div>
+      <div class="kpi"><div class="lbl"><i class="fa-solid fa-link"></i> Liens actifs</div><div class="val">0</div><div class="delta">Aucun lien créé</div></div>
+      <div class="kpi"><div class="lbl"><i class="fa-solid fa-mouse-pointer"></i> Clics totaux</div><div class="val">0</div><div class="delta">— 0,00 % de variation</div></div>
+      <div class="kpi"><div class="lbl"><i class="fa-solid fa-unlock"></i> Déblocages validés</div><div class="val">0</div><div class="delta">taux de 0,00 %</div></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-head"><h3>Revenus — 7 derniers jours</h3><span class="row-link">Total : 0,00 €</span></div>
+        <div class="empty-state">
+          <i class="fa-solid fa-chart-line"></i>
+          <p>Aucune donnée pour cette période.</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Derniers retraits</h3></div>
+        <div class="empty-state">
+          <i class="fa-solid fa-wallet"></i>
+          <p>Aucun retrait effectué pour le moment.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Derniers liens</h3>
+        <a class="btn btn-sm" href="links.html">Voir tout</a>
+      </div>
+      <div class="empty-state">
+        <i class="fa-solid fa-link"></i>
+        <p>Tu n'as encore créé aucun lien.</p>
+        <a class="btn btn-solid btn-sm" href="links.html"><i class="fa-solid fa-plus"></i> Créer mon premier lien</a>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/dashboard-common.js"></script>
+<script src="../assets/js/notifications.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="dashboard.js"></script>
+<script src="dashboard-stats.js"></script>
+</body>
+</html>

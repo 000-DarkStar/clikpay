@@ -1,0 +1,85 @@
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#050505;--field:#0e0e0e;--line:#1c1c1c;--line2:#2a2a2a;--txt:#fff;--mut:#8b8b8b;--ok:#3ddc84}
+html,body{height:100%}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',system-ui,sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button,input,select{font:inherit;color:inherit}
+.split{display:grid;grid-template-columns:1fr 1fr;min-height:100vh}
+
+/* ---------- Panneau gauche (blanc / gris) ---------- */
+.hero{position:relative;display:flex;flex-direction:column;justify-content:space-between;padding:40px 56px 56px;overflow:hidden;background:#050505 url('../img/background.png') center/cover no-repeat}
+.hero::after{content:"";position:absolute;top:0;right:0;bottom:0;width:30%;pointer-events:none;background:linear-gradient(90deg,transparent,var(--bg))}
+.hero>*{position:relative;z-index:1}
+.brand-logo{align-self:flex-start;display:inline-block;line-height:0}
+.brand-logo img{height:68px;width:auto;display:block;margin:-12px 0 0 -12px}
+.hero-bottom{max-width:460px}
+.kicker{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:#d8d8dc;margin-bottom:18px}
+.hero h1{font-family:'Space Grotesk',sans-serif;font-size:54px;line-height:1.02;letter-spacing:-.035em;font-weight:700;margin-bottom:20px}
+.hero p{color:#a9a9ae;font-size:15px;line-height:1.6;max-width:390px;margin-bottom:32px}
+.steps{display:flex;flex-direction:column;gap:8px}
+.step{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:12px;border:1px solid var(--line);background:rgba(5,5,5,.55);color:#cfcfd3;font-size:14px}
+.step .n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:11px;background:#1a1a1c;color:#bbb;flex:none}
+.step.on{background:#fff;color:#111;border-color:#fff}
+.step.on .n{background:#111;color:#fff}
+
+/* ---------- Panneau droit (formulaire) ---------- */
+.panel{display:flex;align-items:center;justify-content:center;padding:48px 24px}
+.form-col{width:100%;max-width:545px}
+.form-col h2{font-family:'Space Grotesk',sans-serif;font-size:38px;letter-spacing:-.03em;font-weight:700;margin-bottom:34px}
+.oauth{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.oauth button{display:flex;align-items:center;justify-content:center;gap:9px;height:46px;border-radius:10px;border:1px solid var(--line);background:var(--field);cursor:pointer;font-weight:600;transition:border-color .15s,background .15s}
+.oauth button:hover{border-color:#444;background:#141414}
+.or{display:flex;align-items:center;gap:14px;margin:30px 0 26px;color:var(--mut);font-size:11px;letter-spacing:.14em}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.sect{font-weight:700;margin-bottom:26px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.field{margin-bottom:18px}
+.field label{display:flex;gap:8px;align-items:baseline;font-weight:600;font-size:13px;margin-bottom:10px}
+.field label small{color:var(--mut);font-weight:400;font-size:11.5px;margin-left:auto}
+.field label small.inl{margin-left:0}
+.input{position:relative}
+.input input,.input select{width:100%;height:50px;padding:0 18px;border-radius:10px;border:1px solid var(--line);background:var(--field);outline:none;transition:border-color .15s,box-shadow .15s;appearance:none}
+.input input::placeholder{color:#555}
+.input input:focus,.input select:focus{border-color:#cfcfcf;box-shadow:0 0 0 3px rgba(255,255,255,.08)}
+.input select{cursor:pointer;font-weight:600;font-size:15px}
+.input .chev{position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--mut);pointer-events:none}
+.eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--mut);cursor:pointer;padding:6px}
+.eye:hover{color:#fff}
+.input.has-eye input{padding-right:46px}
+.forgot{margin-left:auto;font-size:12px;font-weight:400;color:var(--mut);text-decoration:none}
+.forgot:hover{color:#fff}
+.check{display:flex;align-items:center;gap:12px;cursor:pointer;font-size:14px;color:#d6d6d6;margin-bottom:22px}
+.check input{appearance:none;width:20px;height:20px;border-radius:5px;border:1px solid #3a3a3a;background:var(--field);display:grid;place-items:center;cursor:pointer;flex:none}
+.check input:checked{background:#fff;border-color:#fff}
+.check input:checked::after{content:"";width:5px;height:10px;border:solid #111;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.check a{text-decoration:underline;text-underline-offset:3px;font-weight:500}
+.strength{border:1px solid var(--line);border-radius:10px;padding:16px;margin:2px 0 22px}
+.strength-top{display:flex;justify-content:space-between;font-size:12.5px;color:#cfcfcf;margin-bottom:10px}
+.strength-top span:last-child{color:var(--mut);font-size:11.5px}
+.bar{height:3px;border-radius:3px;background:#1d1d1d;margin-bottom:14px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:#fff;transition:width .25s,background .25s}
+.rules{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:11px;color:var(--mut)}
+.rules li{list-style:none;display:flex;align-items:center;gap:5px}
+.rules li.ok{color:var(--ok)}
+.rules li i{font-size:9px}
+.invoice{margin-bottom:26px}
+.invoice .check{margin-bottom:6px}
+.invoice small{color:var(--mut);font-size:12px;padding-left:2px}
+.submit{width:100%;height:50px;border-radius:10px;border:0;background:#fff;color:#111;font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity .15s,transform .1s}
+.submit:disabled{background:#8c8c8c;color:#222;cursor:not-allowed;opacity:.9}
+.submit:not(:disabled):hover{opacity:.9}
+.submit:not(:disabled):active{transform:scale(.99)}
+.switch{text-align:center;color:var(--mut);margin-top:26px;font-size:14px}
+.switch a{color:#fff;font-weight:600;text-decoration:none}
+.switch a:hover{text-decoration:underline}
+.switch.sm{font-size:12.5px;margin-top:14px}
+.switch.sm a{font-weight:400;color:var(--mut)}
+.switch.sm a.w{color:#fff;font-weight:600}
+a:focus-visible,button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+
+@media (max-width:980px){
+  .split{grid-template-columns:1fr}
+  .hero{display:none}
+  .grid2{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
