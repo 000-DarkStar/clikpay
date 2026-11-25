@@ -70,24 +70,8 @@
 <script>
 const u=document.getElementById('u'),p=document.getElementById('p');
 const form=document.getElementById('f');
+const go=document.getElementById('go');
 let turnstileToken='', turnstileWidgetId=null;
-
-// Remplace le widget mal configuré par un widget Turnstile explicite.
-const oldWidget=document.querySelector('.turnstile');
-if(oldWidget) oldWidget.style.display='none';
-
-const turnstileField=document.createElement('div');
-turnstileField.className='field';
-turnstileField.innerHTML='<div id="turnstile-login" aria-label="Vérification anti-bot"></div>';
-form.insertBefore(turnstileField, form.querySelector('.switch') || null);
-
-const go=document.createElement('button');
-go.type='submit';
-go.className='submit';
-go.id='go';
-go.disabled=true;
-go.innerHTML='Se connecter <i class="fa-solid fa-arrow-right"></i>';
-form.appendChild(go);
 
 const check=()=>{go.disabled=!(u.value.trim()&&p.value&&turnstileToken)};
 u.addEventListener('input',check);p.addEventListener('input',check);
@@ -99,10 +83,7 @@ document.querySelector('.eye').addEventListener('click',e=>{
 });
 
 function renderTurnstile(){
-  if(!window.turnstile){
-    setTimeout(renderTurnstile,150);
-    return;
-  }
+  if(!window.turnstile){setTimeout(renderTurnstile,150);return;}
   turnstileWidgetId=window.turnstile.render('#turnstile-login',{ 
     sitekey:'0x4AAAAAAGRAl9vpVVIGbDub',
     callback(token){turnstileToken=token;check();},
@@ -119,19 +100,14 @@ form.addEventListener('submit',async e=>{
   const original=go.innerHTML;
   go.innerHTML='Connexion…';
   try{
-    const result=await apiRequest('/auth/login',{ 
-      method:'POST',
-      body:JSON.stringify({email:u.value.trim(),password:p.value,turnstileToken})
-    });
+    const result=await apiRequest('/auth/login',{method:'POST',body:JSON.stringify({email:u.value.trim(),password:p.value,turnstileToken})});
     Auth.setToken(result.token);Auth.setUser(result.user);
     window.location.href='/dashboard/dashboard.html';
   }catch(error){
     alert(error.message || 'Impossible de se connecter');
     turnstileToken='';
     if(window.turnstile&&turnstileWidgetId!==null)window.turnstile.reset(turnstileWidgetId);
-  }finally{
-    go.innerHTML=original;check();
-  }
+  }finally{go.innerHTML=original;check();}
 });
 
 // Connexion Google OAuth

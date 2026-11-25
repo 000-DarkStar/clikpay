@@ -122,6 +122,7 @@
 <script>
 const $=id=>document.getElementById(id);
 const u=$('u'),e=$('e'),p=$('p'),p2=$('p2'),tos=$('tos'),go=$('go');
+window.registerTurnstileToken='';
 const tests={len:v=>v.length>=8,up:v=>/[A-Z]/.test(v),lo:v=>/[a-z]/.test(v),num:v=>/\d/.test(v),sp:v=>/[^A-Za-z0-9]/.test(v)};
 const labels=['Très faible','Faible','Moyen','Bon','Excellent'];
 function update(){
@@ -135,7 +136,7 @@ function update(){
   $('bar').style.width=(score*20)+'%';
   $('bar').style.background=score<3?'#ff6b6b':score<5?'#ffc24b':'#3ddc84';
   $('lvl').textContent=p.value?labels[Math.max(score-1,0)]:'Commence à écrire';
-  const valid=u.value.trim()&&/^\S+@\S+\.\S+$/.test(e.value)&&score===5&&p.value===p2.value&&tos.checked;
+  const valid=u.value.trim()&&/^\S+@\S+\.\S+$/.test(e.value)&&score===5&&p.value===p2.value&&tos.checked&&window.registerTurnstileToken;
   go.disabled=!valid;
 }
 [u,e,p,p2,tos].forEach(el=>el.addEventListener('input',update));
@@ -144,22 +145,6 @@ document.querySelectorAll('.eye').forEach(b=>b.addEventListener('click',()=>{
   inp.type=show?'text':'password';
   b.innerHTML='<i class="fa-regular fa-eye'+(show?'-slash':'')+'"></i>';
 }));
-$('f').addEventListener('submit',ev=>{
-  ev.preventDefault();
-  const formData = new FormData(ev.target);
-  fetch('/assets/js/api.js', {
-    method: 'POST',
-    body: formData,
-  }).then(response=>response.json()).then(data=>{
-    if(data.success)window.location.href='index.html';
-    else alert(data.error);
-  }).catch(err=>console.error(err));
-});
-
-// Connexion Google OAuth
-document.getElementById('googleBtn').addEventListener('click', () => {
-  window.location.href = 'https://api.clikpay.fr/auth/google';
-});
 </script>
 <script>
 let registerTurnstileToken='', registerWidgetId=null;
@@ -169,9 +154,9 @@ function renderRegisterTurnstile(){
   if(!window.turnstile){setTimeout(renderRegisterTurnstile,150);return;}
   registerWidgetId=window.turnstile.render('#turnstile-register',{ 
     sitekey:'0x4AAAAAAGRAl9vpVVIGbDub',
-    callback(token){registerTurnstileToken=token;},
-    'expired-callback':()=>{registerTurnstileToken='';},
-    'error-callback':()=>{registerTurnstileToken='';}
+    callback(token){registerTurnstileToken=token;window.registerTurnstileToken=token;update();},
+    'expired-callback':()=>{registerTurnstileToken='';window.registerTurnstileToken='';update();},
+    'error-callback':()=>{registerTurnstileToken='';window.registerTurnstileToken='';update();}
   });
 }
 renderRegisterTurnstile();
@@ -189,14 +174,10 @@ registerForm.addEventListener('submit',async ev=>{
     window.location.href='/dashboard/dashboard.html';
   }catch(error){
     alert(error.message || 'Impossible de créer le compte');
-    registerTurnstileToken='';
+    registerTurnstileToken='';window.registerTurnstileToken='';update();
     if(window.turnstile&&registerWidgetId!==null)window.turnstile.reset(registerWidgetId);
-  }finally{go.innerHTML=original;go.disabled=false;}
+  }finally{go.innerHTML=original;update();}
 });
-</script>
-<script>
-const legacyCaptcha=document.querySelector('.g-recaptcha');
-if(legacyCaptcha){legacyCaptcha.id='turnstile-register';legacyCaptcha.className='';legacyCaptcha.removeAttribute('data-sitekey');}
 </script>
 </body>
 </html>
