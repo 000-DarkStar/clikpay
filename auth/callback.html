@@ -55,6 +55,7 @@
         <h2>Redirection...</h2>
     </div>
 
+    <script src="/assets/js/api.js"></script>
     <script>
         // Récupérer le token depuis l'URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -74,7 +75,7 @@
             localStorage.setItem('clikpay_token', token);
 
             // Récupérer les infos utilisateur
-            fetch('http://localhost:3001/user/profile', {
+            fetch(`${window.API_URL}/api/user/profile`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }

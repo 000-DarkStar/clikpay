@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-import session from 'express-session';
 import passport from 'passport';
 import rateLimit from 'express-rate-limit';
 
@@ -24,8 +23,22 @@ const PORT = process.env.PORT || 3001;
 
 // Middlewares de sécurité
 app.use(helmet());
+
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'https://clikpay.fr',
+  'https://www.clikpay.fr',
+  'http://localhost:3000'
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Origin not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 
@@ -43,21 +56,25 @@ app.use(express.urlencoded({ extended: true }));
 // Servir les fichiers statiques (interface de test)
 app.use('/test', express.static('public'));
 
-// Configuration de la session
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 24 heures
-  }
-}));
-
 // Initialisation de Passport
 app.use(passport.initialize());
-app.use(passport.session());
+
+// Routes techniques avant la redirection publique des liens courts
+app.get('/', (req, res) => {
+  res.json({
+    name: 'ClikPay Backend API',
+    status: 'ok',
+    health: '/health'
+  });
+});
+
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'ClikPay Backend API is running',
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Routes
 app.use('/auth', authRoutes);
@@ -73,15 +90,6 @@ if (process.env.NODE_ENV === 'development') {
   app.use('/auth-dev', authDevRoutes);
   console.log('⚠️  DEV routes enabled at /auth-dev (NO TURNSTILE)');
 }
-
-// Route de test
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    message: 'ClikPay Backend API is running',
-    timestamp: new Date().toISOString()
-  });
-});
 
 // Gestion des erreurs 404
 app.use((req, res) => {
