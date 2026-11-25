@@ -6,6 +6,10 @@
     {
       "source": "/auth/callback",
       "destination": "/auth/callback.html"
+    },
+    {
+      "source": "/auth/callback/",
+      "destination": "/auth/callback.html"
     }
   ]
 }
