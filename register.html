@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="assets/css/auth.css">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script src="/assets/js/api.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div class="split">
@@ -38,8 +39,7 @@
 
       <div class="oauth">
         <button type="button" id="googleBtn"><i class="fa-brands fa-google"></i> Google</button>
-        <button type="button" disabled title="Bientôt disponible"><i class="fa-brands fa-github"></i> GitHub</button>
-        <button type="button" disabled title="Bientôt disponible"><i class="fa-brands fa-discord"></i> Discord</button>
+        <button type="button" id="discordBtn"><i class="fa-brands fa-discord"></i> Discord</button>
       </div>
 
       <div class="field" style="margin-top:30px">
@@ -171,7 +171,7 @@ registerForm.addEventListener('submit',async ev=>{
 </script>
 <script>
 const $=id=>document.getElementById(id);
-const u=$('u'),e=$('e'),p=$('p'),p2=$('p2'),tos=$('tos'),go=$('go'),googleBtn=$('googleBtn');
+const u=$('u'),e=$('e'),p=$('p'),p2=$('p2'),tos=$('tos'),go=$('go'),googleBtn=$('googleBtn'),discordBtn=$('discordBtn');
 window.registerTurnstileToken='';
 googleBtn.disabled=true;
 const tests={len:v=>v.length>=8,up:v=>/[A-Z]/.test(v),lo:v=>/[a-z]/.test(v),num:v=>/\d/.test(v),sp:v=>/[^A-Za-z0-9]/.test(v)};
@@ -202,6 +202,11 @@ googleBtn.addEventListener('click',()=>{
   if(!tos.checked){alert('Veuillez accepter les conditions d’utilisation.');return;}
   if(!window.registerTurnstileToken){alert('Veuillez terminer la vérification Turnstile.');return;}
   window.location.href='https://api.clikpay.fr/auth/google';
+});
+discordBtn.addEventListener('click',()=>{
+  if(!tos.checked){alert('Veuillez accepter les conditions d’utilisation.');return;}
+  if(!window.registerTurnstileToken){alert('Veuillez terminer la vérification Turnstile.');return;}
+  window.location.href='https://api.clikpay.fr/auth/discord';
 });
 </script>
 </body>

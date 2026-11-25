@@ -99,3 +99,4 @@ window.redirectIfLoggedIn = redirectIfLoggedIn;
 window.API_URL = API_URL;
 window.SUPABASE_URL = SUPABASE_URL;
 window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
+window.SUPABASE_URL = SUPABASE_URL;
