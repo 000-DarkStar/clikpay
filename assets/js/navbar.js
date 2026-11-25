@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
     userName.textContent = user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName || user.email;
 
     // Email avec @
-    userEmail.textContent = `@${user.email.split('@')[0]}`;
+    userEmail.textContent = user.email;
 
     // Gestion du toggle du menu
     const menuTrigger = document.querySelector('.user-menu-trigger');

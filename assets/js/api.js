@@ -1,5 +1,7 @@
 // Configuration de l'API Backend
-const API_URL = 'https://api.clikpay.fr';
+const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:3001'
+  : 'https://api.clikpay.fr';
 const SUPABASE_URL = 'https://uhqczdodkopatfrymzle.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_4nc0EFm_eepqlb3lPyxZAA_7CCKWCP3';
 
@@ -32,64 +34,98 @@ const Auth = {
 
   // Récupérer les infos utilisateur
   getUser() {
-    const user = localStorage.getItem('clikpay_user');
-    return user ? JSON.parse(user) : null;
+    try { return JSON.parse(localStorage.getItem('clikpay_user') || 'null'); }
+    catch (_) { return null; }
   },
 
   // Déconnexion
-  logout() {
+  async logout() {
+    const token = this.getToken();
+    if (token) {
+      try {
+        await fetch(`${API_URL}/auth/logout`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+        });
+      } catch (_) {}
+    }
     this.removeToken();
     localStorage.removeItem('clikpay_user');
-    window.location.href = '/login.html';
+    localStorage.removeItem('user');
+    sessionStorage.clear();
+    window.location.replace('/login.html');
+  },
+
+  async syncUser() {
+    const token = this.getToken();
+    if (!token) return null;
+    try {
+      const verify = await apiRequest('/auth/verify');
+      if (!verify.valid) throw new Error('Session invalide');
+      const profile = await apiRequest('/api/user/profile');
+      this.setUser(profile.user);
+      return profile.user;
+    } catch (_) {
+      this.removeToken();
+      localStorage.removeItem('clikpay_user');
+      localStorage.removeItem('user');
+      return null;
+    }
   },
 
   // Headers pour les requêtes authentifiées
   getHeaders() {
-    const headers = {
-      'Content-Type': 'application/json'
-    };
+    const headers = { 'Content-Type': 'application/json' };
     const token = this.getToken();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
+    if (token) headers['Authorization'] = `Bearer ${token}`;
     return headers;
   }
 };
 
 // Fonction pour faire des requêtes à l'API
 async function apiRequest(endpoint, options = {}) {
-  try {
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      ...options,
-      headers: Auth.getHeaders()
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || 'Une erreur est survenue');
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    cache: 'no-store',
+    ...options,
+    headers: { ...Auth.getHeaders(), ...(options.headers || {}) }
+  });
+  let data;
+  try { data = await response.json(); } catch (_) { data = {}; }
+  if (response.status === 401 || response.status === 403) {
+    if (endpoint !== '/auth/verify') {
+      Auth.removeToken();
+      localStorage.removeItem('clikpay_user');
+      localStorage.removeItem('user');
     }
-
-    return data;
-  } catch (error) {
-    console.error('API Error:', error);
-    throw error;
   }
+  if (!response.ok) throw new Error(data.error || 'Une erreur est survenue');
+  return data;
 }
 
 // Vérifier si l'utilisateur est connecté sur les pages protégées
-function requireAuth() {
+async function requireAuth() {
   if (!Auth.isLoggedIn()) {
-    window.location.href = '/login.html';
+    window.location.replace('/login.html');
+    return false;
   }
+  const user = await Auth.syncUser();
+  if (!user) {
+    window.location.replace('/login.html');
+    return false;
+  }
+  return true;
 }
 
 // Rediriger si déjà connecté (pour login/register)
-function redirectIfLoggedIn() {
-  if (Auth.isLoggedIn()) {
-    window.location.href = '/dashboard';
-  }
+async function redirectIfLoggedIn() {
+  if (await Auth.syncUser()) window.location.replace('/dashboard/dashboard.html');
 }
+
+window.addEventListener('pageshow', function(event) {
+  if (event.persisted && document.querySelector('#main, .shell')) {
+    requireAuth();
+  }
+});
 
 // Export des fonctions
 window.Auth = Auth;
@@ -99,4 +135,3 @@ window.redirectIfLoggedIn = redirectIfLoggedIn;
 window.API_URL = API_URL;
 window.SUPABASE_URL = SUPABASE_URL;
 window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
-window.SUPABASE_URL = SUPABASE_URL;

@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS users (
   email_verified BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   last_login TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  pseudo VARCHAR(255) UNIQUE NOT NULL
 );
 
 -- Créer un index sur l'email pour des recherches rapides
@@ -81,3 +82,4 @@ COMMENT ON COLUMN users.email_verified IS 'Indique si l''email a été vérifié
 COMMENT ON COLUMN users.created_at IS 'Date de création du compte';
 COMMENT ON COLUMN users.last_login IS 'Date de dernière connexion';
 COMMENT ON COLUMN users.updated_at IS 'Date de dernière mise à jour du profil';
+COMMENT ON COLUMN users.pseudo IS 'Pseudo de l''utilisateur';

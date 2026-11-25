@@ -1,6 +1,7 @@
 import express from 'express';
 import { supabase } from '../config/supabase.js';
 import { authenticateToken } from '../middleware/auth.js';
+import { revokeToken } from '../middleware/tokenBlacklist.js';
 import { body, validationResult } from 'express-validator';
 
 const router = express.Router();
@@ -10,26 +11,26 @@ router.get('/profile', authenticateToken, async (req, res) => {
   try {
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, email, first_name, last_name, avatar_url, email_verified, created_at, last_login')
+      .select('id, email, pseudo, first_name, last_name, avatar_url, email_verified, google_id, discord_id, created_at, last_login')
       .eq('id', req.user.id)
       .single();
 
     if (error) throw error;
 
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+    if (!user) return res.status(404).json({ error: 'User not found' });
 
     res.json({
       user: {
         id: user.id,
+        pseudo: user.pseudo || user.first_name,
         email: user.email,
-        firstName: user.first_name,
+        firstName: user.pseudo || user.first_name,
         lastName: user.last_name,
         avatarUrl: user.avatar_url,
         emailVerified: user.email_verified,
         createdAt: user.created_at,
-        lastLogin: user.last_login
+        lastLogin: user.last_login,
+        authProvider: user.google_id ? 'google' : user.discord_id ? 'discord' : 'local',
       }
     });
   } catch (error) {
@@ -43,24 +44,25 @@ router.put(
   '/profile',
   authenticateToken,
   [
+    body('pseudo').optional().trim().notEmpty(),
     body('firstName').optional().trim().notEmpty(),
     body('lastName').optional().trim().notEmpty(),
-    body('email').optional().isEmail(),
     body('avatarUrl').optional().isURL()
   ],
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-    const { firstName, lastName, email, avatarUrl } = req.body;
+    const { pseudo, firstName, lastName, avatarUrl } = req.body;
 
     try {
       const updateData = {};
-      if (firstName) updateData.first_name = firstName;
-      if (lastName) updateData.last_name = lastName;
-      if (email) updateData.email = email;
+      if (pseudo || firstName) {
+        const profileName = pseudo || firstName;
+        updateData.pseudo = profileName;
+        updateData.first_name = profileName;
+      }
+      if (lastName !== undefined) updateData.last_name = lastName;
       if (avatarUrl) updateData.avatar_url = avatarUrl;
 
       if (Object.keys(updateData).length === 0) {
@@ -71,7 +73,7 @@ router.put(
         .from('users')
         .update(updateData)
         .eq('id', req.user.id)
-        .select('id, email, first_name, last_name, avatar_url, email_verified')
+        .select('id, pseudo, email, first_name, last_name, avatar_url, email_verified, google_id, discord_id')
         .single();
 
       if (error) throw error;
@@ -80,11 +82,13 @@ router.put(
         message: 'Profile updated successfully',
         user: {
           id: updatedUser.id,
+          pseudo: updatedUser.pseudo || updatedUser.first_name,
           email: updatedUser.email,
-          firstName: updatedUser.first_name,
+          firstName: updatedUser.pseudo || updatedUser.first_name,
           lastName: updatedUser.last_name,
           avatarUrl: updatedUser.avatar_url,
-          emailVerified: updatedUser.email_verified
+          emailVerified: updatedUser.email_verified,
+          authProvider: updatedUser.google_id ? 'google' : updatedUser.discord_id ? 'discord' : 'local'
         }
       });
     } catch (error) {
@@ -165,6 +169,9 @@ router.delete('/account', authenticateToken, async (req, res) => {
       .eq('id', req.user.id);
 
     if (error) throw error;
+
+    // Révoquer le token de l'utilisateur
+    revokeToken(req.user.jti);
 
     res.json({ message: 'Account deleted successfully' });
   } catch (error) {

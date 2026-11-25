@@ -33,46 +33,49 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        // Vérifier si l'utilisateur existe déjà
-        const { data: existingUser, error: fetchError } = await supabase
-          .from('users')
-          .select('*')
-          .eq('google_id', profile.id)
-          .single();
+        const email = profile.emails?.[0]?.value?.toLowerCase();
+        const googleName = profile.displayName || [profile.name?.givenName, profile.name?.familyName].filter(Boolean).join(' ').trim();
+        const avatarUrl = profile.photos?.[0]?.value || null;
+        if (!email) throw new Error('Email Google non disponible');
 
-        if (existingUser) {
-          // Utilisateur existe, mettre à jour la dernière connexion
-          const { data: updatedUser, error: updateError } = await supabase
-            .from('users')
-            .update({
-              last_login: new Date().toISOString(),
-              avatar_url: profile.photos[0]?.value || null
-            })
-            .eq('id', existingUser.id)
-            .select()
-            .single();
+        let { data: user } = await supabase
+          .from('users').select('*').eq('google_id', profile.id).maybeSingle();
 
-          if (updateError) throw updateError;
+        if (!user) {
+          const linked = await supabase.from('users').select('*').eq('email', email).maybeSingle();
+          user = linked.data;
+        }
+
+        if (user) {
+          const pseudo = user.pseudo && user.pseudo.trim() ? user.pseudo : (googleName || email.split('@')[0]);
+          const { data: updatedUser, error } = await supabase
+            .from('users').update({
+              google_id: profile.id,
+              pseudo,
+              first_name: pseudo,
+              last_name: user.last_name || profile.name?.familyName || '',
+              avatar_url: avatarUrl || user.avatar_url,
+              email_verified: true,
+              last_login: new Date().toISOString()
+            }).eq('id', user.id).select().single();
+          if (error) throw error;
           return done(null, updatedUser);
         }
 
-        // Créer un nouvel utilisateur
-        const { data: newUser, error: createError } = await supabase
-          .from('users')
-          .insert({
+        const pseudo = googleName || email.split('@')[0];
+        const { data: newUser, error } = await supabase
+          .from('users').insert({
             google_id: profile.id,
-            email: profile.emails[0].value,
-            first_name: profile.name.givenName,
-            last_name: profile.name.familyName,
-            avatar_url: profile.photos[0]?.value || null,
+            email,
+            pseudo,
+            first_name: pseudo,
+            last_name: profile.name?.familyName || '',
+            avatar_url: avatarUrl,
             email_verified: true,
             created_at: new Date().toISOString(),
             last_login: new Date().toISOString()
-          })
-          .select()
-          .single();
-
-        if (createError) throw createError;
+          }).select().single();
+        if (error) throw error;
         done(null, newUser);
       } catch (error) {
         done(error, null);

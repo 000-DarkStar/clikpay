@@ -37,7 +37,19 @@ app.get('/auth/callback', (req, res) => {
 });
 
 // Rediriger /dashboard vers le dossier dashboard
-app.use('/dashboard', express.static(path.join(__dirname, 'dashboard')));
+// Pages privées : aucune mise en cache navigateur côté serveur
+app.use('/dashboard', (req, res, next) => {
+  res.set({
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0'
+  });
+  next();
+}, express.static(path.join(__dirname, 'dashboard')));
+
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dashboard', 'dashboard.html'));
+});
 
 app.listen(PORT, () => {
   console.log(`\n🎨 Frontend ClikPay en ligne !`);

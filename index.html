@@ -14,7 +14,7 @@
 <body>
 <div class="bg-layer"></div>
 
-<nav id="nav"><div class="wrap nav-row">
+<nav id="nav"><div class="wrap nav-row>
   <a class="brand brand-logo" href="index.html"><img class="logo-dark" src="assets/img/logo-white.svg" alt="clik.pay"><img class="logo-light" src="assets/img/logo-black.svg" alt="clik.pay"></a>
   <div class="nav-links">
     <a href="index.html">Accueil</a>
@@ -178,51 +178,41 @@
 <script src="assets/js/api.js"></script>
 <script src="assets/js/main.js"></script>
 <script>
-// Vérifier si l'utilisateur est connecté et afficher le menu utilisateur
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
   const authButtons = document.getElementById('authButtons');
   const userMenu = document.getElementById('userMenu');
-  const user = Auth.getUser();
+  const user = await Auth.syncUser();
 
-  if (user && Auth.isLoggedIn()) {
-    // Utilisateur connecté : afficher le menu utilisateur
+  if (user) {
     authButtons.style.display = 'none';
     userMenu.style.display = 'block';
 
-    // Afficher les infos utilisateur
     const userAvatar = document.getElementById('userAvatar');
     const userAvatarLarge = document.getElementById('userAvatarLarge');
     const userName = document.getElementById('userName');
     const userEmail = document.getElementById('userEmail');
+    const name = user.pseudo || user.firstName || user.email;
+    const initial = name.charAt(0).toUpperCase();
 
-    // Avatar : photo ou initiale
-    const initial = user.firstName ? user.firstName.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase();
     if (user.avatarUrl) {
-      userAvatar.innerHTML = `<img src="${user.avatarUrl}" alt="${user.firstName}">`;
-      userAvatarLarge.innerHTML = `<img src="${user.avatarUrl}" alt="${user.firstName}">`;
+      userAvatar.innerHTML = `<img src="${user.avatarUrl}" alt="${name}">`;
+      userAvatarLarge.innerHTML = `<img src="${user.avatarUrl}" alt="${name}">`;
     } else {
       userAvatar.textContent = initial;
       userAvatarLarge.textContent = initial;
     }
 
-    // Nom complet
-    userName.textContent = user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName || user.email;
+    userName.textContent = name;
+    userEmail.textContent = user.email;
 
-    // Email avec @
-    userEmail.textContent = `@${user.email.split('@')[0]}`;
-
-    // Gestion du toggle du menu
     const menuTrigger = document.querySelector('.user-menu-trigger');
     const dropdown = document.querySelector('.user-dropdown');
-
     if (menuTrigger && dropdown) {
       menuTrigger.addEventListener('click', function(e) {
         e.stopPropagation();
         menuTrigger.classList.toggle('active');
         dropdown.classList.toggle('active');
       });
-
-      // Fermer le menu si on clique ailleurs
       document.addEventListener('click', function(e) {
         if (!userMenu.contains(e.target)) {
           menuTrigger.classList.remove('active');
@@ -231,13 +221,10 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
 
-    // Déconnexion
     document.getElementById('logoutBtn').addEventListener('click', function() {
       Auth.logout();
-      window.location.href = '/login.html';
     });
   } else {
-    // Utilisateur non connecté : afficher les boutons de connexion
     authButtons.style.display = 'flex';
     userMenu.style.display = 'none';
   }

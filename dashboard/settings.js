@@ -1,6 +1,14 @@
 // Gestion de la page Réglages
 document.addEventListener('DOMContentLoaded', async function() {
-  const user = Auth.getUser();
+  // Synchroniser les réglages depuis le backend
+  let user;
+  try {
+    const response = await apiRequest('/api/user/profile');
+    user = response.user;
+  } catch (error) {
+    showNotification(error.message, 'error');
+    return;
+  }
 
   // Charger les données utilisateur dans les champs
   if (user) {
@@ -8,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const emailInput = document.querySelector('input[type="email"]');
 
     if (pseudoInput) {
-      pseudoInput.value = user.firstName || '';
+      pseudoInput.value = user.pseudo || '';
     }
     if (emailInput) {
       emailInput.value = user.email || '';
@@ -30,38 +38,20 @@ document.addEventListener('DOMContentLoaded', async function() {
         return;
       }
 
-      if (!email || !email.includes('@')) {
-        showNotification('Adresse e-mail invalide', 'error');
-        return;
-      }
-
       try {
         saveProfileBtn.disabled = true;
         saveProfileBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enregistrement...';
 
-        const response = await fetch(`${API_URL}/api/user/profile`, {
+        const data = await apiRequest('/api/user/profile', {
           method: 'PUT',
-          headers: Auth.getHeaders(),
-          body: JSON.stringify({
-            firstName: pseudo,
-            email: email
-          })
+          body: JSON.stringify({ pseudo })
         });
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Erreur lors de la mise à jour');
-        }
-
-        // Mettre à jour les données locales
-        const updatedUser = { ...user, firstName: pseudo, email: email };
+        const updatedUser = data.user;
         Auth.setUser(updatedUser);
 
         showNotification('Profil mis à jour avec succès', 'success');
-
-        // Recharger la page pour afficher le nouveau pseudo dans la topbar
-        setTimeout(() => window.location.reload(), 1000);
+        setTimeout(() => window.location.reload(), 500);
       } catch (error) {
         console.error('Erreur:', error);
         showNotification(error.message, 'error');

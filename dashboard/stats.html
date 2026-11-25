@@ -87,5 +87,61 @@
 <script src="../assets/js/dashboard-common.js"></script>
 <script src="../assets/js/main.js"></script>
 <script src="dashboard.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const periodMap = ['24h', '7d', '30d', '90d'];
+  const tabs = document.querySelectorAll('.tab-bar .tab-btn');
+
+  async function loadStats(period = '7d') {
+    try {
+      const dashboard = await apiRequest('/api/stats/dashboard');
+      const revenue = await apiRequest(`/api/stats/revenue?period=${period}`);
+      const linksResult = await apiRequest('/api/links');
+
+      const clicks = dashboard.totalClicks || 0;
+      const unlocks = dashboard.validatedUnlocks || 0;
+      const conversion = clicks ? ((unlocks / clicks) * 100).toFixed(2) : '0,00';
+      const vals = document.querySelectorAll('.stat-grid .kpi .val');
+      if (vals[0]) vals[0].textContent = clicks;
+      if (vals[1]) vals[1].textContent = unlocks;
+      if (vals[2]) vals[2].textContent = `${conversion.replace('.', ',')} %`;
+      if (vals[3]) vals[3].textContent = `${Number(revenue.total || 0).toFixed(2).replace('.', ',')} €`;
+
+      const dayPanel = document.querySelector('.panel');
+      const days = Object.entries(revenue.byDay || {});
+      if (days.length) {
+        dayPanel.innerHTML = '<div class="panel-head"><h3>Déblocages par jour</h3></div>' + days.map(([day, values]) => `
+          <div style="padding:10px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between">
+            <span>${new Date(day).toLocaleDateString('fr-FR')}</span>
+            <strong>${Number(values.total || 0).toFixed(4).replace('.', ',')} €</strong>
+          </div>`).join('');
+      }
+
+      const links = linksResult.links || [];
+      const best = [...links].sort((a, b) => b.totalClicks - a.totalClicks).slice(0, 5);
+      const countryPanel = document.querySelectorAll('.grid-2 .panel')[0];
+      const bestPanel = document.querySelectorAll('.grid-2 .panel')[1];
+      if (countryPanel) countryPanel.innerHTML = '<div class="panel-head"><h3>Répartition par pays</h3></div><div class="empty-state"><i class="fa-solid fa-earth-europe"></i><p>Les données géographiques sont disponibles après collecte du pays sur les clics.</p></div>';
+      if (bestPanel) {
+        bestPanel.innerHTML = '<div class="panel-head"><h3>Meilleurs liens</h3></div>' + (best.length ? best.map(link => `
+          <div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between">
+            <span style="max-width:70%;overflow:hidden;text-overflow:ellipsis">${link.title || link.originalUrl}</span>
+            <strong>${link.totalClicks} clics</strong>
+          </div>`).join('') : '<div class="empty-state"><i class="fa-solid fa-ranking-star"></i><p>Aucun lien à classer pour le moment.</p></div>');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  tabs.forEach((tab, index) => tab.addEventListener('click', () => {
+    tabs.forEach(item => item.classList.remove('active'));
+    tab.classList.add('active');
+    loadStats(periodMap[index] || '7d');
+  }));
+
+  await loadStats('7d');
+});
+</script>
 </body>
 </html>

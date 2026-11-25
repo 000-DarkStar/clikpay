@@ -159,7 +159,7 @@ registerForm.addEventListener('submit',async ev=>{
   const original=go.innerHTML;
   go.innerHTML='Création…';
   try{
-    const result=await apiRequest('/auth/register',{method:'POST',body:JSON.stringify({email:e.value.trim(),password:p.value,firstName:u.value.trim(),lastName:u.value.trim(),turnstileToken:registerTurnstileToken})});
+    const result=await apiRequest('/auth/register',{method:'POST',body:JSON.stringify({email:e.value.trim(),password:p.value,pseudo:u.value.trim(),firstName:u.value.trim(),lastName:'',turnstileToken:registerTurnstileToken})});
     Auth.setToken(result.token);Auth.setUser(result.user);
     window.location.href='/dashboard/dashboard.html';
   }catch(error){
@@ -174,6 +174,7 @@ const $=id=>document.getElementById(id);
 const u=$('u'),e=$('e'),p=$('p'),p2=$('p2'),tos=$('tos'),go=$('go'),googleBtn=$('googleBtn'),discordBtn=$('discordBtn');
 window.registerTurnstileToken='';
 googleBtn.disabled=true;
+discordBtn.disabled=true;
 const tests={len:v=>v.length>=8,up:v=>/[A-Z]/.test(v),lo:v=>/[a-z]/.test(v),num:v=>/\d/.test(v),sp:v=>/[^A-Za-z0-9]/.test(v)};
 const labels=['Très faible','Faible','Moyen','Bon','Excellent'];
 function update(){
@@ -189,6 +190,7 @@ function update(){
   $('lvl').textContent=p.value?labels[Math.max(score-1,0)]:'Commence à écrire';
   const oauthReady=tos.checked&&window.registerTurnstileToken;
   googleBtn.disabled=!oauthReady;
+  discordBtn.disabled=!oauthReady;
   const valid=u.value.trim()&&/^\S+@\S+\.\S+$/.test(e.value)&&score===5&&p.value===p2.value&&oauthReady;
   go.disabled=!valid;
 }
@@ -203,10 +205,13 @@ googleBtn.addEventListener('click',()=>{
   if(!window.registerTurnstileToken){alert('Veuillez terminer la vérification Turnstile.');return;}
   window.location.href='https://api.clikpay.fr/auth/google';
 });
-discordBtn.addEventListener('click',()=>{
+discordBtn.addEventListener('click',async()=>{
   if(!tos.checked){alert('Veuillez accepter les conditions d’utilisation.');return;}
   if(!window.registerTurnstileToken){alert('Veuillez terminer la vérification Turnstile.');return;}
-  window.location.href='https://api.clikpay.fr/auth/discord';
+  if(!window.supabase){alert('Impossible de charger Supabase. Rechargez la page.');return;}
+  const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY,{auth:{flowType:'pkce',detectSessionInUrl:true}});
+  const {error}=await client.auth.signInWithOAuth({provider:'discord',options:{redirectTo:'https://www.clikpay.fr/auth/callback.html'}});
+  if(error)alert(error.message);
 });
 </script>
 </body>

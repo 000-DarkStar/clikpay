@@ -121,7 +121,7 @@ document.getElementById('discordBtn').addEventListener('click', async () => {
   if (!turnstileToken) { alert('Veuillez terminer la vérification Turnstile avant de continuer.'); return; }
   if (!window.supabase) { alert('Impossible de charger Supabase. Rechargez la page.'); return; }
   const client = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
-  const { error } = await client.auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: `${window.location.origin}/auth/callback.html` } });
+  const { error } = await client.auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: 'https://www.clikpay.fr/auth/callback.html' } });
   if (error) alert(error.message);
 });
 </script>
