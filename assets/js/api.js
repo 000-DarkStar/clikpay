@@ -1,5 +1,7 @@
 // Configuration de l'API Backend
 const API_URL = 'https://api.clikpay.fr';
+const SUPABASE_URL = 'https://uhqczdodkopatfrymzle.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_4nc0EFm_eepqlb3lPyxZAA_7CCKWCP3';
 
 // Fonctions utilitaires pour l'authentification
 const Auth = {
@@ -95,3 +97,5 @@ window.apiRequest = apiRequest;
 window.requireAuth = requireAuth;
 window.redirectIfLoggedIn = redirectIfLoggedIn;
 window.API_URL = API_URL;
+window.SUPABASE_URL = SUPABASE_URL;
+window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;

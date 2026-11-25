@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(255) UNIQUE NOT NULL,
   password_hash VARCHAR(255),
   google_id VARCHAR(255) UNIQUE,
+  discord_id VARCHAR(255) UNIQUE,
   first_name VARCHAR(100) NOT NULL,
   last_name VARCHAR(100) NOT NULL,
   avatar_url TEXT,
@@ -24,6 +25,9 @@ CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
 -- Créer un index sur google_id pour des recherches rapides
 CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
+
+-- Créer un index sur discord_id pour des recherches rapides
+CREATE INDEX IF NOT EXISTS idx_users_discord_id ON users(discord_id);
 
 -- Fonction pour mettre à jour automatiquement updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -69,6 +73,7 @@ COMMENT ON COLUMN users.id IS 'Identifiant unique de l''utilisateur';
 COMMENT ON COLUMN users.email IS 'Adresse email de l''utilisateur';
 COMMENT ON COLUMN users.password_hash IS 'Hash du mot de passe (NULL pour les utilisateurs OAuth uniquement)';
 COMMENT ON COLUMN users.google_id IS 'Identifiant Google pour l''authentification OAuth';
+COMMENT ON COLUMN users.discord_id IS 'Identifiant Discord pour l''authentification OAuth';
 COMMENT ON COLUMN users.first_name IS 'Prénom de l''utilisateur';
 COMMENT ON COLUMN users.last_name IS 'Nom de famille de l''utilisateur';
 COMMENT ON COLUMN users.avatar_url IS 'URL de l''avatar de l''utilisateur';

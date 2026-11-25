@@ -66,45 +66,57 @@
             document.getElementById('content').innerHTML = `
                 <div class="error">
                     <h2>❌ Erreur de connexion</h2>
-                    <p>Une erreur est survenue lors de l'authentification Google.</p>
+                    <p>Une erreur est survenue lors de l'authentification OAuth.</p>
                     <p><a href="/login.html" style="color: #667eea;">Retour à la connexion</a></p>
                 </div>
             `;
         } else if (token) {
-            // Sauvegarder le token
             localStorage.setItem('clikpay_token', token);
-
-            // Récupérer les infos utilisateur
-            fetch(`${window.API_URL}/api/user/profile`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.user) {
-                    localStorage.setItem('clikpay_user', JSON.stringify(data.user));
-                }
-                // Marquer comme nouvelle connexion pour afficher la notification
-                sessionStorage.setItem('just_logged_in', 'true');
-                // Rediriger vers le dashboard
-                window.location.href = '/dashboard/dashboard.html';
-            })
-            .catch(err => {
-                console.error('Error fetching user:', err);
-                // Marquer quand même comme nouvelle connexion
-                sessionStorage.setItem('just_logged_in', 'true');
-                // Rediriger quand même vers le dashboard
-                window.location.href = '/dashboard/dashboard.html';
-            });
+            sessionStorage.setItem('just_logged_in', 'true');
+            window.location.href = '/dashboard/dashboard.html';
         } else {
             document.getElementById('content').innerHTML = `
-                <div class="error">
-                    <h2>❌ Token manquant</h2>
-                    <p>Aucun token d'authentification reçu.</p>
-                    <p><a href="/login.html" style="color: #667eea;">Retour à la connexion</a></p>
-                </div>
+                <div class="error"><h2>Récupération de Discord...</h2></div>
             `;
+
+            (async () => {
+                try {
+                    if (!window.supabase) throw new Error('SDK Supabase indisponible');
+                    const client = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+                    let { data: sessionData } = await client.auth.getSession();
+
+                    if (!sessionData?.session && urlParams.get('code')) {
+                        const exchanged = await client.auth.exchangeCodeForSession(urlParams.get('code'));
+                        sessionData = exchanged.data;
+                        if (exchanged.error) throw exchanged.error;
+                    }
+
+                    const supabaseAccessToken = sessionData?.session?.access_token;
+                    if (!supabaseAccessToken) throw new Error('Session Discord introuvable');
+
+                    const response = await fetch(`${window.API_URL}/auth/discord/session`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({supabaseAccessToken})
+                    });
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.error || 'Erreur Discord');
+
+                    localStorage.setItem('clikpay_token', result.token);
+                    localStorage.setItem('clikpay_user', JSON.stringify(result.user));
+                    sessionStorage.setItem('just_logged_in', 'true');
+                    window.location.href = '/dashboard/dashboard.html';
+                } catch (err) {
+                    console.error(err);
+                    document.getElementById('content').innerHTML = `
+                        <div class="error">
+                            <h2>❌ Erreur Discord</h2>
+                            <p>${err.message}</p>
+                            <p><a href="/login.html" style="color: #667eea;">Retour à la connexion</a></p>
+                        </div>
+                    `;
+                }
+            })();
         }
     </script>
 </body>
