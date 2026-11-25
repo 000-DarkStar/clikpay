@@ -107,9 +107,11 @@
           <small>Tu pourras aussi les ajouter plus tard dans Facturation.</small>
         </div>
 
-        <div class="turnstile-container">
-          <div id="turnstile-register" aria-label="Vérification Cloudflare Turnstile"></div>
-        </div>
+        <div id="turnstile-register" class="cf-turnstile"
+               data-sitekey="0x4AAAAAAGRAl9vpVVIGbDub"
+               data-callback="onRegisterTurnstile"
+               data-expired-callback="onRegisterTurnstileExpired"
+               data-error-callback="onRegisterTurnstileExpired"></div>
 
         <button class="submit" id="go" disabled>Créer mon compte <i class="fa-solid fa-arrow-right"></i></button>
       </form>
@@ -153,14 +155,28 @@ const registerForm=document.getElementById('f');
 
 function renderRegisterTurnstile(){
   if(!window.turnstile){setTimeout(renderRegisterTurnstile,150);return;}
+  if(registerWidgetId!==null)return;
   registerWidgetId=window.turnstile.render('#turnstile-register',{ 
     sitekey:'0x4AAAAAAGRAl9vpVVIGbDub',
-    callback(token){registerTurnstileToken=token;window.registerTurnstileToken=token;update();},
-    'expired-callback':()=>{registerTurnstileToken='';window.registerTurnstileToken='';update();},
-    'error-callback':()=>{registerTurnstileToken='';window.registerTurnstileToken='';update();}
+    callback:window.onRegisterTurnstile,
+    'expired-callback':window.onRegisterTurnstileExpired,
+    'error-callback':window.onRegisterTurnstileExpired
   });
 }
+
 renderRegisterTurnstile();
+
+window.onRegisterTurnstile = function(token){
+  registerTurnstileToken=token;
+  window.registerTurnstileToken=token;
+  update();
+};
+
+window.onRegisterTurnstileExpired = function(){
+  registerTurnstileToken='';
+  window.registerTurnstileToken='';
+  update();
+};
 
 registerForm.addEventListener('submit',async ev=>{
   ev.preventDefault();
@@ -175,8 +191,8 @@ registerForm.addEventListener('submit',async ev=>{
     window.location.href='/dashboard/dashboard.html';
   }catch(error){
     alert(error.message || 'Impossible de créer le compte');
-    registerTurnstileToken='';window.registerTurnstileToken='';update();
-    if(window.turnstile&&registerWidgetId!==null)window.turnstile.reset(registerWidgetId);
+    window.onRegisterTurnstileExpired();
+    if(window.turnstile)window.turnstile.reset();
   }finally{go.innerHTML=original;update();}
 });
 </script>
