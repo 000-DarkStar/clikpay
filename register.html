@@ -108,7 +108,6 @@
         </div>
 
         <div class="turnstile-container">
-          <div class="g-recaptcha" data-sitekey="6LeUcBMlAAAAABi1KjKjKjJJKlJKlJKlJKl"></div>
         </div>
 
         <button class="submit" id="go" disabled>Créer mon compte <i class="fa-solid fa-arrow-right"></i></button>
@@ -169,7 +168,7 @@ const registerForm=document.getElementById('f');
 function renderRegisterTurnstile(){
   if(!window.turnstile){setTimeout(renderRegisterTurnstile,150);return;}
   registerWidgetId=window.turnstile.render('#turnstile-register',{ 
-    sitekey:'0x4AAAAAAABAAAAF1yZAAAAAOCJ',
+    sitekey:'0x4AAAAAAGRAl9vpVVIGbDub',
     callback(token){registerTurnstileToken=token;},
     'expired-callback':()=>{registerTurnstileToken='';},
     'error-callback':()=>{registerTurnstileToken='';}

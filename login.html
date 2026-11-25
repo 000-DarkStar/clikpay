@@ -104,7 +104,7 @@ function renderTurnstile(){
     return;
   }
   turnstileWidgetId=window.turnstile.render('#turnstile-login',{ 
-    sitekey:'0x4AAAAAAABAAAAF1yZAAAAAOCJ',
+    sitekey:'0x4AAAAAAGRAl9vpVVIGbDub',
     callback(token){turnstileToken=token;check();},
     'expired-callback':()=>{turnstileToken='';check();},
     'error-callback':()=>{turnstileToken='';check();}
