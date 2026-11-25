@@ -10,6 +10,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="icon" href="assets/img/favicon.svg">
 <link rel="stylesheet" href="assets/css/auth.css">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script src="/assets/js/api.js"></script>
 </head>
 <body>
 <div class="split">
@@ -105,6 +107,10 @@
           <small>Tu pourras aussi les ajouter plus tard dans Facturation.</small>
         </div>
 
+        <div class="turnstile-container">
+          <div class="g-recaptcha" data-sitekey="6LeUcBMlAAAAABi1KjKjKjJJKlJKlJKlJKl"></div>
+        </div>
+
         <button class="submit" id="go" disabled>Créer mon compte <i class="fa-solid fa-arrow-right"></i></button>
       </form>
 
@@ -139,12 +145,59 @@ document.querySelectorAll('.eye').forEach(b=>b.addEventListener('click',()=>{
   inp.type=show?'text':'password';
   b.innerHTML='<i class="fa-regular fa-eye'+(show?'-slash':'')+'"></i>';
 }));
-$('f').addEventListener('submit',ev=>ev.preventDefault());
+$('f').addEventListener('submit',ev=>{
+  ev.preventDefault();
+  const formData = new FormData(ev.target);
+  fetch('/assets/js/api.js', {
+    method: 'POST',
+    body: formData,
+  }).then(response=>response.json()).then(data=>{
+    if(data.success)window.location.href='index.html';
+    else alert(data.error);
+  }).catch(err=>console.error(err));
+});
 
 // Connexion Google OAuth
 document.getElementById('googleBtn').addEventListener('click', () => {
   window.location.href = 'https://api.clikpay.fr/auth/google';
 });
+</script>
+<script>
+let registerTurnstileToken='', registerWidgetId=null;
+const registerForm=document.getElementById('f');
+
+function renderRegisterTurnstile(){
+  if(!window.turnstile){setTimeout(renderRegisterTurnstile,150);return;}
+  registerWidgetId=window.turnstile.render('#turnstile-register',{ 
+    sitekey:'0x4AAAAAAABAAAAF1yZAAAAAOCJ',
+    callback(token){registerTurnstileToken=token;},
+    'expired-callback':()=>{registerTurnstileToken='';},
+    'error-callback':()=>{registerTurnstileToken='';}
+  });
+}
+renderRegisterTurnstile();
+
+registerForm.addEventListener('submit',async ev=>{
+  ev.preventDefault();
+  if(!registerTurnstileToken){alert('Veuillez terminer la vérification Turnstile.');return;}
+  const go=document.getElementById('go'),u=document.getElementById('u'),e=document.getElementById('e'),p=document.getElementById('p');
+  go.disabled=true;
+  const original=go.innerHTML;
+  go.innerHTML='Création…';
+  try{
+    const result=await apiRequest('/auth/register',{method:'POST',body:JSON.stringify({email:e.value.trim(),password:p.value,firstName:u.value.trim(),lastName:u.value.trim(),turnstileToken:registerTurnstileToken})});
+    Auth.setToken(result.token);Auth.setUser(result.user);
+    window.location.href='/dashboard/dashboard.html';
+  }catch(error){
+    alert(error.message || 'Impossible de créer le compte');
+    registerTurnstileToken='';
+    if(window.turnstile&&registerWidgetId!==null)window.turnstile.reset(registerWidgetId);
+  }finally{go.innerHTML=original;go.disabled=false;}
+});
+</script>
+<script>
+const legacyCaptcha=document.querySelector('.g-recaptcha');
+if(legacyCaptcha){legacyCaptcha.id='turnstile-register';legacyCaptcha.className='';legacyCaptcha.removeAttribute('data-sitekey');}
 </script>
 </body>
 </html>

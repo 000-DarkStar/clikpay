@@ -6,6 +6,11 @@ dotenv.config();
 export const verifyTurnstile = async (req, res, next) => {
   const { turnstileToken } = req.body;
 
+  if (!process.env.TURNSTILE_SECRET_KEY) {
+    console.error('TURNSTILE_SECRET_KEY is not configured');
+    return res.status(500).json({ error: 'Turnstile is not configured on the server' });
+  }
+
   if (!turnstileToken) {
     return res.status(400).json({
       error: 'Turnstile token is required',

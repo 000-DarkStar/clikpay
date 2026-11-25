@@ -42,10 +42,17 @@ app.use(cors({
   credentials: true
 }));
 
+// Render se trouve derrière un proxy HTTPS : utiliser l'adresse IP client.
+app.set('trust proxy', 1);
+
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limite à 100 requêtes par IP
+  max: 100, // limite à 100 requêtes par IP
+  skip: (req) => {
+    // Exclure les routes de santé et d'authentification OAuth du limiteur
+    return req.path === '/health' || req.path.startsWith('/auth/google');
+  }
 });
 app.use(limiter);
 

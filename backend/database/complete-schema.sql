@@ -175,16 +175,31 @@ CREATE TABLE IF NOT EXISTS platform_stats (
 CREATE INDEX IF NOT EXISTS idx_platform_stats_date ON platform_stats(date DESC);
 
 -- ============================================
+-- FUNCTIONS: Fonction de mise à jour des timestamps
+-- ============================================
+
+-- Fonction pour mettre à jour automatiquement le champ updated_at
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ============================================
 -- TRIGGERS: Mise à jour automatique des timestamps
 -- ============================================
 
 -- Trigger pour links.updated_at
+DROP TRIGGER IF EXISTS update_links_updated_at ON links;
 CREATE TRIGGER update_links_updated_at
 BEFORE UPDATE ON links
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
 -- Trigger pour user_settings.updated_at
+DROP TRIGGER IF EXISTS update_user_settings_updated_at ON user_settings;
 CREATE TRIGGER update_user_settings_updated_at
 BEFORE UPDATE ON user_settings
 FOR EACH ROW
@@ -327,6 +342,18 @@ WITH CHECK (true);
 CREATE POLICY "Users can update their own settings"
 ON user_settings FOR UPDATE
 USING (true);
+
+-- Activer RLS sur platform_stats
+ALTER TABLE platform_stats ENABLE ROW LEVEL SECURITY;
+
+-- Politiques pour platform_stats (lecture publique)
+CREATE POLICY "Anyone can read platform stats"
+ON platform_stats FOR SELECT
+USING (true);
+
+CREATE POLICY "System can insert platform stats"
+ON platform_stats FOR INSERT
+WITH CHECK (true);
 
 -- ============================================
 -- DONNÉES INITIALES
