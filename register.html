@@ -123,33 +123,6 @@
 
 </div>
 <script>
-const $=id=>document.getElementById(id);
-const u=$('u'),e=$('e'),p=$('p'),p2=$('p2'),tos=$('tos'),go=$('go');
-window.registerTurnstileToken='';
-const tests={len:v=>v.length>=8,up:v=>/[A-Z]/.test(v),lo:v=>/[a-z]/.test(v),num:v=>/\d/.test(v),sp:v=>/[^A-Za-z0-9]/.test(v)};
-const labels=['Très faible','Faible','Moyen','Bon','Excellent'];
-function update(){
-  let score=0;
-  document.querySelectorAll('#rules li').forEach(li=>{
-    const ok=tests[li.dataset.r](p.value);
-    li.classList.toggle('ok',ok);
-    li.querySelector('i').className='fa-solid '+(ok?'fa-check':'fa-xmark');
-    if(ok)score++;
-  });
-  $('bar').style.width=(score*20)+'%';
-  $('bar').style.background=score<3?'#ff6b6b':score<5?'#ffc24b':'#3ddc84';
-  $('lvl').textContent=p.value?labels[Math.max(score-1,0)]:'Commence à écrire';
-  const valid=u.value.trim()&&/^\S+@\S+\.\S+$/.test(e.value)&&score===5&&p.value===p2.value&&tos.checked&&window.registerTurnstileToken;
-  go.disabled=!valid;
-}
-[u,e,p,p2,tos].forEach(el=>el.addEventListener('input',update));
-document.querySelectorAll('.eye').forEach(b=>b.addEventListener('click',()=>{
-  const inp=b.parentElement.querySelector('input'),show=inp.type==='password';
-  inp.type=show?'text':'password';
-  b.innerHTML='<i class="fa-regular fa-eye'+(show?'-slash':'')+'"></i>';
-}));
-</script>
-<script>
 let registerTurnstileToken='', registerWidgetId=null;
 const registerForm=document.getElementById('f');
 
@@ -194,6 +167,41 @@ registerForm.addEventListener('submit',async ev=>{
     window.onRegisterTurnstileExpired();
     if(window.turnstile)window.turnstile.reset();
   }finally{go.innerHTML=original;update();}
+});
+</script>
+<script>
+const $=id=>document.getElementById(id);
+const u=$('u'),e=$('e'),p=$('p'),p2=$('p2'),tos=$('tos'),go=$('go'),googleBtn=$('googleBtn');
+window.registerTurnstileToken='';
+googleBtn.disabled=true;
+const tests={len:v=>v.length>=8,up:v=>/[A-Z]/.test(v),lo:v=>/[a-z]/.test(v),num:v=>/\d/.test(v),sp:v=>/[^A-Za-z0-9]/.test(v)};
+const labels=['Très faible','Faible','Moyen','Bon','Excellent'];
+function update(){
+  let score=0;
+  document.querySelectorAll('#rules li').forEach(li=>{
+    const ok=tests[li.dataset.r](p.value);
+    li.classList.toggle('ok',ok);
+    li.querySelector('i').className='fa-solid '+(ok?'fa-check':'fa-xmark');
+    if(ok)score++;
+  });
+  $('bar').style.width=(score*20)+'%';
+  $('bar').style.background=score<3?'#ff6b6b':score<5?'#ffc24b':'#3ddc84';
+  $('lvl').textContent=p.value?labels[Math.max(score-1,0)]:'Commence à écrire';
+  const oauthReady=tos.checked&&window.registerTurnstileToken;
+  googleBtn.disabled=!oauthReady;
+  const valid=u.value.trim()&&/^\S+@\S+\.\S+$/.test(e.value)&&score===5&&p.value===p2.value&&oauthReady;
+  go.disabled=!valid;
+}
+[u,e,p,p2,tos].forEach(el=>el.addEventListener('input',update));
+document.querySelectorAll('.eye').forEach(b=>b.addEventListener('click',()=>{
+  const inp=b.parentElement.querySelector('input'),show=inp.type==='password';
+  inp.type=show?'text':'password';
+  b.innerHTML='<i class="fa-regular fa-eye'+(show?'-slash':'')+'"></i>';
+}));
+googleBtn.addEventListener('click',()=>{
+  if(!tos.checked){alert('Veuillez accepter les conditions d’utilisation.');return;}
+  if(!window.registerTurnstileToken){alert('Veuillez terminer la vérification Turnstile.');return;}
+  window.location.href='https://api.clikpay.fr/auth/google';
 });
 </script>
 </body>
