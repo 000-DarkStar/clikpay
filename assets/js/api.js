@@ -1,5 +1,5 @@
 // Configuration de l'API Backend
-const API_URL = 'https://api.clikpay.fr';
+const API_URL = 'https://clikpay-backend.onrender.com';
 
 // Fonctions utilitaires pour l'authentification
 const Auth = {
