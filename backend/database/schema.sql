@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   last_login TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  pseudo VARCHAR(255) UNIQUE NOT NULL
+  pseudo VARCHAR(255) NOT NULL
 );
 
 -- Créer un index sur l'email pour des recherches rapides

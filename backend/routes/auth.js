@@ -12,6 +12,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const router = express.Router();
+const FRONTEND_URL = (process.env.FRONTEND_URL || 'https://www.clikpay.fr').replace(/\/$/, '');
 
 // Génération du JWT
 const generateToken = (user) => {
@@ -173,16 +174,26 @@ router.get(
 // Route: Authentification Google - Callback
 router.get(
   '/google/callback',
-  passport.authenticate('google', {
-    failureRedirect: `${process.env.FRONTEND_URL}/login?error=google_auth_failed`,
-    session: false
-  }),
+  (req, res, next) => {
+    passport.authenticate('google', { session: false }, (error, user) => {
+      if (error) {
+        console.error('Google callback error:', error);
+        return res.redirect(`${FRONTEND_URL}/login.html?error=google_auth_failed`);
+      }
+      if (!user) {
+        return res.redirect(`${FRONTEND_URL}/login.html?error=google_auth_failed`);
+      }
+      req.user = user;
+      next();
+    })(req, res, next);
+  },
   (req, res) => {
     try {
       const token = generateToken(req.user);
-      res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${token}`);
+      res.redirect(`${FRONTEND_URL}/auth/callback?token=${token}`);
     } catch (error) {
-      res.redirect(`${process.env.FRONTEND_URL}/login?error=token_generation_failed`);
+      console.error('Google token generation error:', error);
+      res.redirect(`${FRONTEND_URL}/login.html?error=token_generation_failed`);
     }
   }
 );

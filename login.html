@@ -124,6 +124,13 @@ document.getElementById('discordBtn').addEventListener('click', async () => {
   const { error } = await client.auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: 'https://www.clikpay.fr/auth/callback.html' } });
   if (error) alert(error.message);
 });
+
+const oauthError = new URLSearchParams(window.location.search).get('error');
+if (oauthError) {
+  alert(oauthError === 'google_auth_failed'
+    ? 'La connexion Google a échoué. Vérifiez la configuration OAuth Google puis réessayez.'
+    : 'Une erreur est survenue pendant la connexion OAuth.');
+}
 </script>
 </body>
 </html>

@@ -29,25 +29,29 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL,
+      callbackURL: process.env.GOOGLE_CALLBACK_URL || 'https://api.clikpay.fr/auth/google/callback',
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        const email = profile.emails?.[0]?.value?.toLowerCase();
-        const googleName = profile.displayName || [profile.name?.givenName, profile.name?.familyName].filter(Boolean).join(' ').trim();
+        const email = profile.emails?.[0]?.value?.trim().toLowerCase();
+        const googleName = (profile.displayName || [profile.name?.givenName, profile.name?.familyName].filter(Boolean).join(' ').trim()).trim();
         const avatarUrl = profile.photos?.[0]?.value || null;
         if (!email) throw new Error('Email Google non disponible');
 
-        let { data: user } = await supabase
+        const googleLookup = await supabase
           .from('users').select('*').eq('google_id', profile.id).maybeSingle();
+        if (googleLookup.error) throw new Error(`Recherche Google: ${googleLookup.error.message}`);
 
+        let user = googleLookup.data;
         if (!user) {
-          const linked = await supabase.from('users').select('*').eq('email', email).maybeSingle();
-          user = linked.data;
+          const emailLookup = await supabase
+            .from('users').select('*').eq('email', email).maybeSingle();
+          if (emailLookup.error) throw new Error(`Recherche email: ${emailLookup.error.message}`);
+          user = emailLookup.data;
         }
 
         if (user) {
-          const pseudo = user.pseudo && user.pseudo.trim() ? user.pseudo : (googleName || email.split('@')[0]);
+          const pseudo = String(user.pseudo || googleName || email.split('@')[0]).trim();
           const { data: updatedUser, error } = await supabase
             .from('users').update({
               google_id: profile.id,
@@ -58,7 +62,7 @@ passport.use(
               email_verified: true,
               last_login: new Date().toISOString()
             }).eq('id', user.id).select().single();
-          if (error) throw error;
+          if (error) throw new Error(`Mise à jour Google: ${error.message}`);
           return done(null, updatedUser);
         }
 
@@ -75,9 +79,10 @@ passport.use(
             created_at: new Date().toISOString(),
             last_login: new Date().toISOString()
           }).select().single();
-        if (error) throw error;
+        if (error) throw new Error(`Création Google: ${error.message}`);
         done(null, newUser);
       } catch (error) {
+        console.error('Google OAuth strategy error:', error);
         done(error, null);
       }
     }
