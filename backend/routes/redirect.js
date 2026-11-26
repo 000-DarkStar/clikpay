@@ -117,6 +117,8 @@ router.get('/:shortCode', async (req, res) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Redirection en cours - clik.pay</title>
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+        <meta name="google-adsense-account" content="ca-pub-9475401126954449">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9475401126954449" crossorigin="anonymous"></script>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           body {
