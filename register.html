@@ -175,8 +175,8 @@ registerForm.addEventListener('submit',async ev=>{
 const $=id=>document.getElementById(id);
 const u=$('u'),e=$('e'),p=$('p'),p2=$('p2'),tos=$('tos'),go=$('go'),googleBtn=$('googleBtn'),discordBtn=$('discordBtn');
 window.registerTurnstileToken='';
-googleBtn.disabled=true;
-discordBtn.disabled=true;
+googleBtn.disabled=false;
+discordBtn.disabled=false;
 const tests={len:v=>v.length>=8,up:v=>/[A-Z]/.test(v),lo:v=>/[a-z]/.test(v),num:v=>/\d/.test(v),sp:v=>/[^A-Za-z0-9]/.test(v)};
 const labels=['Très faible','Faible','Moyen','Bon','Excellent'];
 function update(){
@@ -190,10 +190,10 @@ function update(){
   $('bar').style.width=(score*20)+'%';
   $('bar').style.background=score<3?'#ff6b6b':score<5?'#ffc24b':'#3ddc84';
   $('lvl').textContent=p.value?labels[Math.max(score-1,0)]:'Commence à écrire';
-  const oauthReady=tos.checked&&window.registerTurnstileToken;
+  const oauthReady=tos.checked;
   googleBtn.disabled=!oauthReady;
   discordBtn.disabled=!oauthReady;
-  const valid=u.value.trim()&&/^\S+@\S+\.\S+$/.test(e.value)&&score===5&&p.value===p2.value&&oauthReady;
+  const valid=u.value.trim()&&/^\S+@\S+\.\S+$/.test(e.value)&&score===5&&p.value===p2.value&&tos.checked&&window.registerTurnstileToken;
   go.disabled=!valid;
 }
 [u,e,p,p2,tos].forEach(el=>el.addEventListener('input',update));
@@ -204,12 +204,10 @@ document.querySelectorAll('.eye').forEach(b=>b.addEventListener('click',()=>{
 }));
 googleBtn.addEventListener('click',()=>{
   if(!tos.checked){alert('Veuillez accepter les conditions d’utilisation.');return;}
-  if(!window.registerTurnstileToken){alert('Veuillez terminer la vérification Turnstile.');return;}
   window.location.href='https://api.clikpay.fr/auth/google';
 });
 discordBtn.addEventListener('click',async()=>{
   if(!tos.checked){alert('Veuillez accepter les conditions d’utilisation.');return;}
-  if(!window.registerTurnstileToken){alert('Veuillez terminer la vérification Turnstile.');return;}
   if(!window.supabase){alert('Impossible de charger Supabase. Rechargez la page.');return;}
   const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY,{auth:{flowType:'pkce',detectSessionInUrl:true,persistSession:true}});
   const {error}=await client.auth.signInWithOAuth({provider:'discord',options:{redirectTo:'https://www.clikpay.fr/auth/callback'}});

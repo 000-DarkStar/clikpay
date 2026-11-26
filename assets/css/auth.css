@@ -26,7 +26,7 @@ button,input,select{font:inherit;color:inherit}
 .panel{display:flex;align-items:center;justify-content:center;padding:48px 24px}
 .form-col{width:100%;max-width:545px}
 .form-col h2{font-family:'Space Grotesk',sans-serif;font-size:38px;letter-spacing:-.03em;font-weight:700;margin-bottom:34px}
-.oauth{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.oauth{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .oauth button{display:flex;align-items:center;justify-content:center;gap:9px;height:46px;border-radius:10px;border:1px solid var(--line);background:var(--field);cursor:pointer;font-weight:600;transition:border-color .15s,background .15s}
 .oauth button:hover{border-color:#444;background:#141414}
 .or{display:flex;align-items:center;gap:14px;margin:30px 0 26px;color:var(--mut);font-size:11px;letter-spacing:.14em}

@@ -38,7 +38,7 @@
       <h2>Content de te revoir</h2>
 
       <div class="oauth">
-        <button type="button" id="googleBtn" disabled><i class="fa-brands fa-google"></i> Google</button>
+        <button type="button" id="googleBtn"><i class="fa-brands fa-google"></i> Google</button>
         <button type="button" id="discordBtn"><i class="fa-brands fa-discord"></i> Discord</button>
       </div>
 
@@ -114,13 +114,11 @@ form.addEventListener('submit',async e=>{
 
 // Connexion Google OAuth
 document.getElementById('googleBtn').addEventListener('click', () => {
-  if (!turnstileToken) { alert('Veuillez terminer la vérification Turnstile avant de continuer.'); return; }
-  window.location.href = 'https://api.clikpay.fr/auth/google';
+  window.location.href = `${window.API_URL}/auth/google`;
 });
 
 // Connexion Discord OAuth via Supabase
 document.getElementById('discordBtn').addEventListener('click', async () => {
-  if (!turnstileToken) { alert('Veuillez terminer la vérification Turnstile avant de continuer.'); return; }
   if (!window.supabase) { alert('Impossible de charger Supabase. Rechargez la page.'); return; }
   const client = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY, { auth: { flowType: 'pkce', persistSession: true, detectSessionInUrl: true } });
   const { error } = await client.auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: 'https://www.clikpay.fr/auth/callback' } });
