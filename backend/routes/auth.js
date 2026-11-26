@@ -183,26 +183,28 @@ router.get(
 // Route: Authentification Google - Callback
 router.get(
   '/google/callback',
-  (req, res, next) => {
-    passport.authenticate('google', { session: false }, (error, user) => {
-      if (error) {
-        console.error('Google callback error:', error);
-        return res.redirect(`${FRONTEND_URL}/login.html?error=google_auth_failed`);
-      }
-      if (!user) {
-        return res.redirect(`${FRONTEND_URL}/login.html?error=google_auth_failed`);
-      }
-      req.user = user;
-      next();
-    })(req, res, next);
-  },
   (req, res) => {
     try {
-      const token = generateToken(req.user);
-      res.redirect(`${FRONTEND_URL}/auth/callback?token=${token}`);
-    } catch (error) {
-      console.error('Google token generation error:', error);
-      res.redirect(`${FRONTEND_URL}/login.html?error=token_generation_failed`);
+      passport.authenticate('google', { session: false }, (error, user, info) => {
+        if (error || !user) {
+          console.error('Google callback rejected:', error || info || 'Utilisateur introuvable');
+          return res.redirect(`${FRONTEND_URL}/login.html?error=google_auth_failed`);
+        }
+
+        try {
+          const token = generateToken(user);
+          return res.redirect(`${FRONTEND_URL}/auth/callback?token=${token}`);
+        } catch (tokenError) {
+          console.error('Google token generation error:', tokenError);
+          return res.redirect(`${FRONTEND_URL}/login.html?error=token_generation_failed`);
+        }
+      })(req, res, (middlewareError) => {
+        console.error('Google callback middleware error:', middlewareError);
+        return res.redirect(`${FRONTEND_URL}/login.html?error=google_auth_failed`);
+      });
+    } catch (callbackError) {
+      console.error('Google callback exception:', callbackError);
+      return res.redirect(`${FRONTEND_URL}/login.html?error=google_auth_failed`);
     }
   }
 );

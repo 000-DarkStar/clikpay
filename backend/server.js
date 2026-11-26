@@ -112,6 +112,9 @@ app.use((req, res) => {
 // Gestionnaire d'erreurs global
 app.use((err, req, res, next) => {
   console.error(err.stack);
+  if (req.path.startsWith('/auth/google/callback')) {
+    return res.redirect(`${process.env.FRONTEND_URL || 'https://www.clikpay.fr'}/login.html?error=google_auth_failed`);
+  }
   res.status(500).json({
     error: 'Something went wrong!',
     message: process.env.NODE_ENV === 'development' ? err.message : undefined
