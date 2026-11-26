@@ -14,7 +14,7 @@
 <body>
 <div class="bg-layer"></div>
 
-<nav id="nav"><div class="wrap nav-row">
+<nav id="nav"><div class="wrap nav-row>
   <a class="brand brand-logo" href="index.html"><img class="logo-dark" src="assets/img/logo-white.svg" alt="clik.pay"><img class="logo-light" src="assets/img/logo-black.svg" alt="clik.pay"></a>
   <div class="nav-links">
     <a href="index.html">Accueil</a>
@@ -22,7 +22,7 @@
     <a href="faq.html">FAQ</a>
   </div>
   <div class="nav-right">
-    <div id="authButtons">
+    <div id="authButtons" style="display:none">
       <a class="link" href="login.html">Connexion</a>
       <a class="btn btn-sm" href="register.html">S'inscrire</a>
     </div>
@@ -181,7 +181,7 @@
 document.addEventListener('DOMContentLoaded', async function() {
   const authButtons = document.getElementById('authButtons');
   const userMenu = document.getElementById('userMenu');
-  const user = await Auth.syncUser();
+  const user = await Auth.init();
 
   if (user) {
     authButtons.style.display = 'none';

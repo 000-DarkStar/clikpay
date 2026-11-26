@@ -51,6 +51,19 @@ app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'dashboard', 'dashboard.html'));
 });
 
+// Permettre au serveur frontend local de router les slugs publics vers le backend.
+app.get(/^\/([a-zA-Z0-9]{6})$/, async (req, res) => {
+  try {
+    const response = await fetch(`http://localhost:3001/${req.params[0]}`);
+    const body = await response.text();
+    res.status(response.status);
+    res.set('Content-Type', response.headers.get('content-type') || 'text/html; charset=utf-8');
+    res.send(body);
+  } catch (_) {
+    res.status(502).send('Le service de liens est temporairement indisponible.');
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`\n🎨 Frontend ClikPay en ligne !`);
   console.log(`📍 http://localhost:${PORT}`);

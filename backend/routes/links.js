@@ -1,9 +1,10 @@
 import express from 'express';
-import { supabase } from '../config/supabase.js';
+import { supabase as publicSupabase, supabaseAdmin } from '../config/supabase.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { body, validationResult } from 'express-validator';
 
 const router = express.Router();
+const supabase = supabaseAdmin || publicSupabase;
 
 // Route: Créer un nouveau lien
 router.post(

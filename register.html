@@ -209,10 +209,13 @@ discordBtn.addEventListener('click',async()=>{
   if(!tos.checked){alert('Veuillez accepter les conditions d’utilisation.');return;}
   if(!window.registerTurnstileToken){alert('Veuillez terminer la vérification Turnstile.');return;}
   if(!window.supabase){alert('Impossible de charger Supabase. Rechargez la page.');return;}
-  const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY,{auth:{flowType:'pkce',detectSessionInUrl:true}});
-  const {error}=await client.auth.signInWithOAuth({provider:'discord',options:{redirectTo:'https://www.clikpay.fr/auth/callback.html'}});
+  const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY,{auth:{flowType:'pkce',detectSessionInUrl:true,persistSession:true}});
+  const {error}=await client.auth.signInWithOAuth({provider:'discord',options:{redirectTo:'https://www.clikpay.fr/auth/callback'}});
   if(error)alert(error.message);
 });
+</script>
+<script>
+if (typeof redirectIfLoggedIn === 'function') redirectIfLoggedIn();
 </script>
 </body>
 </html>

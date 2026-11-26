@@ -12,6 +12,8 @@ import userRoutes from './routes/user.js';
 import linksRoutes from './routes/links.js';
 import statsRoutes from './routes/stats.js';
 import redirectRoutes from './routes/redirect.js';
+import supportRoutes from './routes/support.js';
+import adminRoutes from './routes/admin.js';
 
 // Import de la configuration Passport
 import './config/passport.js';
@@ -61,7 +63,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Servir les fichiers statiques (interface de test)
-app.use('/test', express.static('public'));
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/test', express.static('public'));
+}
 
 // Initialisation de Passport
 app.use(passport.initialize());
@@ -88,6 +92,8 @@ app.use('/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/links', linksRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/support', supportRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Route de redirection publique (doit être en dernier)
 app.use('/', redirectRoutes);

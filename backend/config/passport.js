@@ -1,9 +1,11 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { supabase } from './supabase.js';
+import { supabase as publicSupabase, supabaseAdmin } from './supabase.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+const supabase = supabaseAdmin || publicSupabase;
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -51,6 +53,8 @@ passport.use(
         }
 
         if (user) {
+          if (user.suspended) throw new Error('Compte suspendu');
+
           const pseudo = String(user.pseudo || googleName || email.split('@')[0]).trim();
           const { data: updatedUser, error } = await supabase
             .from('users').update({

@@ -35,16 +35,4 @@ document.addEventListener('DOMContentLoaded', ()=>{
       });
     });
   });
-
-  // new-link quick action (prototype, no backend)
-  const createBtn = document.getElementById('createLinkBtn');
-  if(createBtn){
-    createBtn.addEventListener('click', ()=>{
-      const input = document.getElementById('newLinkInput');
-      if(input && input.value.trim()){
-        alert('Lien créé : clik.pay/go/' + Math.random().toString(36).slice(2,8));
-        input.value='';
-      }
-    });
-  }
 });

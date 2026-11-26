@@ -1,17 +1,18 @@
 import express from 'express';
-import { supabase } from '../config/supabase.js';
+import { supabase as publicSupabase, supabaseAdmin } from '../config/supabase.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { revokeToken } from '../middleware/tokenBlacklist.js';
 import { body, validationResult } from 'express-validator';
 
 const router = express.Router();
+const supabase = supabaseAdmin || publicSupabase;
 
 // Route: Obtenir le profil de l'utilisateur connecté
 router.get('/profile', authenticateToken, async (req, res) => {
   try {
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, email, pseudo, first_name, last_name, avatar_url, email_verified, google_id, discord_id, created_at, last_login')
+      .select('id, email, pseudo, first_name, last_name, avatar_url, email_verified, google_id, discord_id, role, suspended, created_at, last_login')
       .eq('id', req.user.id)
       .single();
 
@@ -31,6 +32,8 @@ router.get('/profile', authenticateToken, async (req, res) => {
         createdAt: user.created_at,
         lastLogin: user.last_login,
         authProvider: user.google_id ? 'google' : user.discord_id ? 'discord' : 'local',
+        role: user.role || 'user',
+        suspended: !!user.suspended,
       }
     });
   } catch (error) {
@@ -73,7 +76,7 @@ router.put(
         .from('users')
         .update(updateData)
         .eq('id', req.user.id)
-        .select('id, pseudo, email, first_name, last_name, avatar_url, email_verified, google_id, discord_id')
+        .select('id, pseudo, email, first_name, last_name, avatar_url, email_verified, google_id, discord_id, role, suspended')
         .single();
 
       if (error) throw error;
@@ -88,7 +91,9 @@ router.put(
           lastName: updatedUser.last_name,
           avatarUrl: updatedUser.avatar_url,
           emailVerified: updatedUser.email_verified,
-          authProvider: updatedUser.google_id ? 'google' : updatedUser.discord_id ? 'discord' : 'local'
+          authProvider: updatedUser.google_id ? 'google' : updatedUser.discord_id ? 'discord' : 'local',
+          role: updatedUser.role || 'user',
+          suspended: !!updatedUser.suspended
         }
       });
     } catch (error) {
@@ -178,6 +183,51 @@ router.delete('/account', authenticateToken, async (req, res) => {
     console.error('Delete account error:', error);
     res.status(500).json({ error: 'Failed to delete account' });
   }
+});
+
+// Route: Changer l’adresse email
+router.put('/email', authenticateToken, [
+  body('email').isEmail().normalizeEmail(),
+  body('currentPassword').optional().isString()
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+  const { data: user, error } = await supabase
+    .from('users').select('id,email,password_hash,google_id,discord_id').eq('id', req.user.id).single();
+  if (error || !user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+
+  if (user.password_hash) {
+    if (!req.body.currentPassword) return res.status(400).json({ error: 'Mot de passe actuel requis' });
+    const bcrypt = (await import('bcryptjs')).default;
+    const valid = await bcrypt.compare(req.body.currentPassword, user.password_hash);
+    if (!valid) return res.status(401).json({ error: 'Mot de passe actuel incorrect' });
+  }
+
+  const normalizedEmail = req.body.email;
+  const existing = await supabase.from('users').select('id').eq('email', normalizedEmail).neq('id', req.user.id).maybeSingle();
+  if (existing.data) return res.status(409).json({ error: 'Cette adresse email est déjà utilisée' });
+
+  const { data: updated, error: updateError } = await supabase
+    .from('users').update({ email: normalizedEmail, email_verified: false }).eq('id', req.user.id)
+    .select('id,pseudo,email,first_name,last_name,avatar_url,email_verified,google_id,discord_id,role,suspended').single();
+  if (updateError) return res.status(500).json({ error: 'Impossible de modifier l’adresse email' });
+
+  res.json({
+    message: 'Adresse email mise à jour',
+    user: {
+      id: updated.id,
+      pseudo: updated.pseudo || updated.first_name,
+      email: updated.email,
+      firstName: updated.pseudo || updated.first_name,
+      lastName: updated.last_name,
+      avatarUrl: updated.avatar_url,
+      emailVerified: updated.email_verified,
+      authProvider: updated.google_id ? 'google' : updated.discord_id ? 'discord' : 'local',
+      role: updated.role || 'user',
+      suspended: !!updated.suspended
+    }
+  });
 });
 
 export default router;

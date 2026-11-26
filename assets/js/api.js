@@ -7,6 +7,8 @@ const SUPABASE_ANON_KEY = 'sb_publishable_4nc0EFm_eepqlb3lPyxZAA_7CCKWCP3';
 
 // Fonctions utilitaires pour l'authentification
 const Auth = {
+  _syncPromise: null,
+
   // Sauvegarder le token
   setToken(token) {
     localStorage.setItem('clikpay_token', token);
@@ -73,6 +75,14 @@ const Auth = {
     }
   },
 
+  // Initialiser l'authentification
+  async init() {
+    if (!this._syncPromise) {
+      this._syncPromise = this.syncUser().finally(() => { this._syncPromise = null; });
+    }
+    return this._syncPromise;
+  },
+
   // Headers pour les requêtes authentifiées
   getHeaders() {
     const headers = { 'Content-Type': 'application/json' };
@@ -108,7 +118,7 @@ async function requireAuth() {
     window.location.replace('/login.html');
     return false;
   }
-  const user = await Auth.syncUser();
+  const user = await Auth.init();
   if (!user) {
     window.location.replace('/login.html');
     return false;
@@ -118,13 +128,22 @@ async function requireAuth() {
 
 // Rediriger si déjà connecté (pour login/register)
 async function redirectIfLoggedIn() {
-  if (await Auth.syncUser()) window.location.replace('/dashboard/dashboard.html');
+  if (await Auth.init()) window.location.replace('/dashboard/dashboard.html');
+}
+
+async function handleAuthPageNavigation() {
+  if (Auth.isLoggedIn()) await redirectIfLoggedIn();
 }
 
 window.addEventListener('pageshow', function(event) {
-  if (event.persisted && document.querySelector('#main, .shell')) {
-    requireAuth();
+  if (event.persisted) {
+    if (document.querySelector('#main, .shell')) requireAuth();
+    if (document.body?.classList.contains('auth-page') || /login|register/.test(location.pathname)) handleAuthPageNavigation();
   }
+});
+window.addEventListener('popstate', () => {
+  if (document.querySelector('#main, .shell')) requireAuth();
+  if (/login|register/.test(location.pathname)) handleAuthPageNavigation();
 });
 
 // Export des fonctions

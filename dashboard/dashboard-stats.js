@@ -1,6 +1,7 @@
 // Script pour le dashboard - Chargement des vraies données
 document.addEventListener('DOMContentLoaded', async function() {
-  requireAuth();
+  const allowed = await requireAuth();
+  if (!allowed) return;
 
   // Charger les statistiques du dashboard
   await loadDashboardStats();

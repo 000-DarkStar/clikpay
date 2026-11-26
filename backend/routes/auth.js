@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { body, validationResult } from 'express-validator';
-import { supabase } from '../config/supabase.js';
+import { supabase as publicSupabase, supabaseAdmin } from '../config/supabase.js';
 import { verifyTurnstile } from '../middleware/turnstile.js';
 import { revokeToken, isTokenRevoked } from '../middleware/tokenBlacklist.js';
 import dotenv from 'dotenv';
@@ -12,6 +12,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const router = express.Router();
+const supabase = supabaseAdmin || publicSupabase;
 const FRONTEND_URL = (process.env.FRONTEND_URL || 'https://www.clikpay.fr').replace(/\/$/, '');
 
 // Génération du JWT
@@ -23,6 +24,7 @@ const generateToken = (user) => {
       firstName: user.pseudo || user.first_name,
       lastName: user.last_name,
       pseudo: user.pseudo || user.first_name,
+      role: user.role || 'user',
       jti: crypto.randomUUID()
     },
     process.env.JWT_SECRET,
@@ -38,7 +40,9 @@ const formatUser = (user) => ({
   lastName: user.last_name || '',
   avatarUrl: user.avatar_url || null,
   emailVerified: user.email_verified || false,
-  authProvider: user.google_id ? 'google' : user.discord_id ? 'discord' : 'local'
+  authProvider: user.google_id ? 'google' : user.discord_id ? 'discord' : 'local',
+  role: user.role || 'user',
+  suspended: !!user.suspended
 });
 
 // Route: Inscription classique
@@ -142,6 +146,11 @@ router.post(
         return res.status(401).json({ error: 'Identifiants invalides' });
       }
 
+      // Vérifier si le compte est suspendu
+      if (user.suspended) {
+        return res.status(403).json({ error: 'Compte suspendu' });
+      }
+
       // Mettre à jour la dernière connexion
       await supabase
         .from('users')
@@ -222,6 +231,9 @@ router.post('/discord/session', async (req, res) => {
     if (findError) throw findError;
 
     if (user) {
+      // Vérifier si le compte est suspendu
+      if (user.suspended) return res.status(403).json({ error: 'Compte suspendu' });
+
       const result = await supabase.from('users').update({
         pseudo,
         first_name: pseudo,

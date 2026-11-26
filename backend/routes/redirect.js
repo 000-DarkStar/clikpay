@@ -1,5 +1,6 @@
 import express from 'express';
-import { supabase } from '../config/supabase.js';
+import { supabase as publicSupabase, supabaseAdmin } from '../config/supabase.js';
+const supabase = supabaseAdmin || publicSupabase;
 
 const router = express.Router();
 
@@ -89,13 +90,9 @@ router.get('/:shortCode', async (req, res) => {
       .gte('clicked_at', oneHourAgo)
       .single();
 
-    // Si pas de clic récent, enregistrer le nouveau clic
+    // Si pas de visite récente, enregistrer une visite réelle. Aucun revenu n'est inventé.
     if (!recentClick) {
-      // Calculer le revenu généré (exemple: 0.005€ par clic)
-      const revenuePerClick = 0.005;
-
-      // Enregistrer le clic
-      const { data: newClick, error: clickError } = await supabase
+      await supabase
         .from('clicks')
         .insert({
           link_id: link.id,
@@ -104,48 +101,12 @@ router.get('/:shortCode', async (req, res) => {
           user_agent: userAgent,
           referrer: referrer,
           device_type: deviceType,
-          revenue_generated: revenuePerClick,
-          ad_viewed: true
-        })
-        .select()
-        .single();
-
-      if (!clickError && newClick) {
-        // Récupérer la commission de l'utilisateur
-        const { data: settings } = await supabase
-          .from('user_settings')
-          .select('commission_rate')
-          .eq('user_id', link.user_id)
-          .single();
-
-        const commissionRate = settings?.commission_rate || 70.00;
-        const userAmount = (revenuePerClick * commissionRate) / 100;
-        const platformAmount = revenuePerClick - userAmount;
-
-        // Enregistrer le revenu
-        await supabase
-          .from('revenues')
-          .insert({
-            user_id: link.user_id,
-            link_id: link.id,
-            click_id: newClick.id,
-            amount: userAmount,
-            commission_rate: commissionRate,
-            platform_commission: platformAmount,
-            status: 'pending'
-          });
-
-        // Mettre à jour le revenu total du lien
-        await supabase
-          .from('links')
-          .update({
-            total_revenue: parseFloat(link.total_revenue) + userAmount
-          })
-          .eq('id', link.id);
-      }
+          revenue_generated: 0,
+          ad_viewed: false
+        });
     }
 
-    // Afficher la page interstitielle avec publicité Google AdSense
+    // Afficher la page interstitielle sans créer artificiellement de revenu publicitaire
     const destinationUrl = link.original_url;
 
     res.send(`
@@ -238,9 +199,6 @@ router.get('/:shortCode', async (req, res) => {
             margin-top: 20px;
           }
         </style>
-        <!-- Google AdSense - Remplacez par votre code -->
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
-          crossorigin="anonymous"></script>
       </head>
       <body>
         <div class="container">
@@ -251,17 +209,8 @@ router.get('/:shortCode', async (req, res) => {
           <div class="timer" id="timer">5</div>
 
           <!-- Zone publicitaire Google AdSense -->
-          <div class="ad-container">
-            <!-- Remplacez par votre code AdSense -->
-            <ins class="adsbygoogle"
-              style="display:block"
-              data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-              data-ad-slot="XXXXXXXXXX"
-              data-ad-format="auto"
-              data-full-width-responsive="true"></ins>
-            <script>
-              (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
+          <div class="ad-container" id="adContainer">
+            Page intermédiaire Click.Pay
           </div>
 
           <button class="skip-btn" id="skipBtn" disabled>
@@ -269,8 +218,7 @@ router.get('/:shortCode', async (req, res) => {
           </button>
 
           <p class="info">
-            Ce service est gratuit et financé par la publicité.<br>
-            Merci de votre soutien ! 💙
+            La destination finale s’ouvre après votre continuation volontaire.
           </p>
         </div>
 

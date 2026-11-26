@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Administration — clik.pay</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><link rel="stylesheet" href="../assets/css/style.css"><link rel="stylesheet" href="dashboard.css"><script>try{document.documentElement.setAttribute('data-theme', localStorage.getItem('cp-theme')||'dark')}catch(e){}</script></head>
+<body><div class="bg-layer"></div><div class="shell">
+<aside id="sidebar"><div class="side-brand"><i class="fa-solid fa-lock"></i><img class="side-logo side-logo-dark" src="../assets/img/logo-white.svg" alt="clik.pay"><img class="side-logo side-logo-light" src="../assets/img/logo-black.svg" alt="clik.pay"></div>
+<nav class="side-nav"><a class="side-link" href="dashboard.html"><i class="fa-solid fa-gauge"></i> Tableau de bord</a><a class="side-link active" href="admin.html"><i class="fa-solid fa-shield-halved"></i> Administration</a><a class="side-link" href="support.html"><i class="fa-solid fa-headset"></i> Support</a><a class="side-link" href="settings.html"><i class="fa-solid fa-gear"></i> Réglages</a></nav><div class="side-foot"><a class="side-link" href="#" id="logoutLink"><i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion</a></div></aside>
+<main id="main"><div class="topbar"><div><div class="page-title">Administration</div><div class="page-sub">Gestion vérifiée côté serveur.</div></div><div class="topbar-right"><div class="user-pill"><div class="avatar"></div><span>Chargement...</span></div></div></div>
+<div id="adminDenied" class="panel" style="display:none"><div class="empty-state"><i class="fa-solid fa-shield-halved"></i><p>Accès administrateur requis.</p></div></div>
+<div id="adminContent">
+<div class="stat-grid" id="adminStats"></div>
+<div class="grid-2"><div class="panel"><div class="panel-head"><h3>Utilisateurs</h3></div><input id="adminUserSearch" type="search" placeholder="Rechercher un utilisateur" style="margin:16px;width:calc(100% - 32px)"><div id="adminUsers"></div></div>
+<div class="panel"><div class="panel-head"><h3>Liens</h3></div><input id="adminLinkSearch" type="search" placeholder="Rechercher un lien" style="margin:16px;width:calc(100% - 32px)"><div id="adminLinks"></div></div></div>
+<div class="panel"><div class="panel-head"><h3>Tickets</h3></div><div id="adminTickets"></div></div>
+</div></main></div>
+<script src="../assets/js/api.js"></script><script src="../assets/js/dashboard-common.js"></script><script src="admin.js"></script>
+</body></html>

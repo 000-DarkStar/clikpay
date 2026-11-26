@@ -1,8 +1,9 @@
 import express from 'express';
-import { supabase } from '../config/supabase.js';
+import { supabase as publicSupabase, supabaseAdmin } from '../config/supabase.js';
 import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
+const supabase = supabaseAdmin || publicSupabase;
 
 // Route: Statistiques du dashboard
 router.get('/dashboard', authenticateToken, async (req, res) => {
@@ -13,7 +14,7 @@ router.get('/dashboard', authenticateToken, async (req, res) => {
     const { data: balanceData, error: balanceError } = await supabase
       .rpc('get_user_balance', { p_user_id: userId });
 
-    if (balanceError) throw balanceError;
+    if (balanceError) console.warn('get_user_balance unavailable:', balanceError.message);
 
     // Nombre de liens actifs
     const { count: linksCount, error: linksError } = await supabase
@@ -32,7 +33,7 @@ router.get('/dashboard', authenticateToken, async (req, res) => {
 
     if (clicksError) throw clicksError;
 
-    const totalClicks = clicksData.reduce((sum, link) => sum + link.total_clicks, 0);
+    const totalClicks = (clicksData || []).reduce((sum, link) => sum + Number(link.total_clicks || 0), 0);
 
     // Déblocages validés (revenus validés)
     const { count: validatedCount, error: validatedError } = await supabase
@@ -41,7 +42,7 @@ router.get('/dashboard', authenticateToken, async (req, res) => {
       .eq('user_id', userId)
       .eq('status', 'validated');
 
-    if (validatedError) throw validatedError;
+    if (validatedError) console.warn('revenues unavailable:', validatedError.message);
 
     // Revenus des 7 derniers jours
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -53,11 +54,12 @@ router.get('/dashboard', authenticateToken, async (req, res) => {
       .gte('generated_at', sevenDaysAgo)
       .order('generated_at', { ascending: true });
 
-    if (recentError) throw recentError;
+    if (recentError) console.warn('recent revenues unavailable:', recentError.message);
+    const revenueRows = recentRevenues || [];
 
     // Grouper par jour
     const revenueByDay = {};
-    recentRevenues.forEach(rev => {
+    revenueRows.forEach(rev => {
       const day = new Date(rev.generated_at).toISOString().split('T')[0];
       if (!revenueByDay[day]) {
         revenueByDay[day] = 0;
@@ -65,7 +67,7 @@ router.get('/dashboard', authenticateToken, async (req, res) => {
       revenueByDay[day] += parseFloat(rev.amount);
     });
 
-    const totalRevenue7Days = recentRevenues.reduce((sum, rev) => sum + parseFloat(rev.amount), 0);
+    const totalRevenue7Days = revenueRows.reduce((sum, rev) => sum + parseFloat(rev.amount), 0);
 
     // Derniers retraits
     const { data: withdrawals, error: withdrawalsError } = await supabase
@@ -75,7 +77,7 @@ router.get('/dashboard', authenticateToken, async (req, res) => {
       .order('requested_at', { ascending: false })
       .limit(5);
 
-    if (withdrawalsError) throw withdrawalsError;
+    if (withdrawalsError) console.warn('withdrawals unavailable:', withdrawalsError.message);
 
     // Derniers liens créés
     const { data: recentLinks, error: recentLinksError } = await supabase
@@ -85,7 +87,8 @@ router.get('/dashboard', authenticateToken, async (req, res) => {
       .order('created_at', { ascending: false })
       .limit(5);
 
-    if (recentLinksError) throw recentLinksError;
+    if (recentLinksError) console.warn('recent links unavailable:', recentLinksError.message);
+    const linkRows = recentLinks || [];
 
     res.json({
       balance: parseFloat(balanceData) || 0,
@@ -96,7 +99,7 @@ router.get('/dashboard', authenticateToken, async (req, res) => {
         total: totalRevenue7Days,
         byDay: revenueByDay
       },
-      recentWithdrawals: withdrawals.map(w => ({
+      recentWithdrawals: (withdrawals || []).map(w => ({
         id: w.id,
         amount: parseFloat(w.amount),
         status: w.status,
@@ -104,7 +107,7 @@ router.get('/dashboard', authenticateToken, async (req, res) => {
         requestedAt: w.requested_at,
         completedAt: w.completed_at
       })),
-      recentLinks: recentLinks.map(link => ({
+      recentLinks: linkRows.map(link => ({
         id: link.id,
         shortCode: link.short_code,
         shortUrl: `${process.env.FRONTEND_URL}/${link.short_code}`,

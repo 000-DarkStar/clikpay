@@ -10,6 +10,10 @@
     {
       "source": "/auth/callback/",
       "destination": "/auth/callback.html"
+    },
+    {
+      "source": "/:slug([a-zA-Z0-9]{6})",
+      "destination": "https://api.clikpay.fr/:slug"
     }
   ]
 }

@@ -42,12 +42,24 @@ document.addEventListener('DOMContentLoaded', async function() {
         saveProfileBtn.disabled = true;
         saveProfileBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enregistrement...';
 
-        const data = await apiRequest('/api/user/profile', {
+        let updatedUser = (await apiRequest('/api/user/profile', {
           method: 'PUT',
           body: JSON.stringify({ pseudo })
-        });
+        })).user;
 
-        const updatedUser = data.user;
+        if (email && email !== user.email) {
+          let currentPassword;
+          if (updatedUser.authProvider === 'local') {
+            currentPassword = prompt('Confirmez votre mot de passe actuel pour changer votre adresse email :');
+            if (!currentPassword) throw new Error('Mot de passe actuel requis');
+          }
+          const emailResult = await apiRequest('/api/user/email', {
+            method: 'PUT',
+            body: JSON.stringify({ email, currentPassword })
+          });
+          updatedUser = emailResult.user;
+        }
+
         Auth.setUser(updatedUser);
 
         showNotification('Profil mis à jour avec succès', 'success');
